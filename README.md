@@ -14,9 +14,31 @@ https://docs.google.com/document/d/15pq0W9kAq_ljLixGtHVDn9wD0mrd_Ck3-KWBjZu3W1I
 ####ER & Schema (D2)
 https://docs.google.com/document/d/1IT8hl958xbVz-hwyeYwBMfjBdKyzSMkYBtFo6epQsLk
 
-##Usage insturctions
-In progress
+##Usage instructions
+
+Things you need:
+- docker
+- docker-compose
+- a working postgres installation (we could use the docker one, but this proves you can access postgres from the local machine)
+
+To get a working psql shell with all the data loaded, go into the test folder and run:
+```
+./playground.sh
+```
+Examine the contents for how/why that works.
 
 ##Build instructions
-To be added
 
+Make a new folder called build, and go into it.
+```
+cmake ..
+make
+```
+
+Also, make sure your git submodules are set up:
+```
+git submodule update
+```
+
+Build dependencies:
+- libpqxx

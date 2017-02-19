@@ -1,0 +1,7 @@
+version: '2'
+services:
+  postgres:
+    build: .
+    network_mode: "host"
+    environment:
+      - POSTGRES_PASSWORD=password

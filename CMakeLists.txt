@@ -14,4 +14,6 @@ include_directories(
   ${pqxx_INCLUDES}
 )
 
+enable_testing()
+
 add_subdirectory(src)
