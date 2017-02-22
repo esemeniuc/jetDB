@@ -13,14 +13,14 @@ INSERT INTO Airline (Prefix,AlName) VALUES ('JAL','Japan Airlines');
 INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES ('1','DAL','Boeing 747','660','7260');
 INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES ('2','DAL','Airbus A380','544','8500');
 INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES ('3','UAE','Boeing 777','396','8555');
-INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES ('4','UAE','Boeing 737','215','3000');
+INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES ('4','JAL','Boeing 737','215','3000');
 INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES ('5','DLH','Airbus A320','220','3300');
 
 INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES ('1','1','DAL','JFK','YVR','2016-10-15 23:39:37','2016-10-16 23:39:37');
 INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES ('2','1','DAL','YVR','JFK','2015-04-01 10:20:31','2015-04-01 14:20:31');
-INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES ('3','2','DLH','CDG','LHR','2016-11-15 15:53:49','2016-11-15 19:53:49');
+INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES ('3','5','DLH','CDG','LHR','2016-11-15 15:53:49','2016-11-15 19:53:49');
 INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES ('4','5','DLH','LHR','CDG','2015-07-20 0:11:03','2015-07-20 10:11:03');
-INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES ('5','4','UAE','JFK','NRT','2015-05-23 22:04:48','2015-05-24 12:04:48');
+INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES ('5','4','JAL','JFK','NRT','2015-05-23 22:04:48','2015-05-24 12:04:48');
 
 INSERT INTO FlightName (FlightNum,Prefix) VALUES ('111','DAL');
 INSERT INTO FlightName (FlightNum,Prefix) VALUES ('222','DLH');
@@ -41,17 +41,17 @@ INSERT INTO Client (GovID,CName) VALUES ('33334444','Jane Woodfield');
 INSERT INTO Client (GovID,CName) VALUES ('44445555','Friðrik Osamu');
 INSERT INTO Client (GovID,CName) VALUES ('55556666','Krystyn Gopal');
 
-INSERT INTO Booking (bID,DateBooked,Cost) VALUES ('1','2016-12-31 22:05:49','544');
-INSERT INTO Booking (bID,DateBooked,Cost) VALUES ('2','2015-05-06 4:58:54','123');
-INSERT INTO Booking (bID,DateBooked,Cost) VALUES ('3','2017-01-23 4:34:09','458');
-INSERT INTO Booking (bID,DateBooked,Cost) VALUES ('4','2016-03-16 3:51:53','454');
-INSERT INTO Booking (bID,DateBooked,Cost) VALUES ('5','2016-11-14 20:40:44','989');
+INSERT INTO Booking (bID) VALUES ('1');
+INSERT INTO Booking (bID) VALUES ('2');
+INSERT INTO Booking (bID) VALUES ('3');
+INSERT INTO Booking (bID) VALUES ('4');
+INSERT INTO Booking (bID) VALUES ('5');
 
-INSERT INTO Books (GovID,bID) VALUES ('22223333','1');
-INSERT INTO Books (GovID,bID) VALUES ('44445555','2');
-INSERT INTO Books (GovID,bID) VALUES ('12345678','3');
-INSERT INTO Books (GovID,bID) VALUES ('12345678','4');
-INSERT INTO Books (GovID,bID) VALUES ('55556666','5');
+INSERT INTO Books (GovID,bID,DateBooked,Cost) VALUES ('22223333','1','2016-12-31 22:05:49','544');
+INSERT INTO Books (GovID,bID,DateBooked,Cost) VALUES ('44445555','2','2015-05-06 4:58:54','123');
+INSERT INTO Books (GovID,bID,DateBooked,Cost) VALUES ('12345678','3','2017-01-23 4:34:09','458');
+INSERT INTO Books (GovID,bID,DateBooked,Cost) VALUES ('12345678','4','2016-03-16 3:51:53','454');
+INSERT INTO Books (GovID,bID,DateBooked,Cost) VALUES ('55556666','5','2016-11-14 20:40:44','989');
 
 INSERT INTO Booked (bID,fID) VALUES ('1','1');
 INSERT INTO Booked (bID,fID) VALUES ('1','2');
