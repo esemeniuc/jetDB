@@ -19,7 +19,6 @@ CREATE TABLE Plane (
   MaxRange SMALLINT
 );
 
-
 CREATE TABLE Flight (
   fID             SERIAL PRIMARY KEY,
   pID             SERIAL REFERENCES Plane (pID),
@@ -37,7 +36,7 @@ CREATE TABLE FlightName (
 );
 
 CREATE TABLE Named (
-  fID       SERIAL REFERENCES Flight (fID),
+  fID       SERIAL REFERENCES Flight (fID) NOT NULL,
   FlightNum SMALLINT,
   Prefix    CHAR(3),
   FOREIGN KEY (FlightNum, Prefix) REFERENCES FlightName,
@@ -50,19 +49,19 @@ CREATE TABLE Client (
 );
 
 CREATE TABLE Booking (
-  bID        SERIAL PRIMARY KEY,
-  DateBooked DATE,
-  Cost       INT
+  bID SERIAL PRIMARY KEY
 );
 
 CREATE TABLE Books (
-  GovID CHAR(100) REFERENCES Client (GovID),
-  bID   SERIAL REFERENCES Booking (bID),
+  GovID      CHAR(100) REFERENCES Client (GovID) NOT NULL,
+  bID        SERIAL REFERENCES Booking (bID)     NOT NULL,
+  DateBooked DATE,
+  Cost       INT,
   PRIMARY KEY (GovID, bID)
 );
 
 CREATE TABLE Booked (
-  bID SERIAL REFERENCES Booking (bID),
+  bID SERIAL REFERENCES Booking (bID) NOT NULL,
   fID SERIAL REFERENCES Flight (fID),
   PRIMARY KEY (bID, fID)
 );
