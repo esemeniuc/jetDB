@@ -105,45 +105,6 @@ pqxx::result::size_type lookupPrint(std::string lookupString, pqxx::work& txn)
 	return lookupResult.size();
 }
 
-int getGovID(pqxx::work& txn)
-{
-	std::string govID;
-	std::string lookupString = ("SELECT GovID, CName FROM Client");
-	std::string validateString;
-	pqxx::result validationResult;
-
-	bool validInput = false;
-	while(validInput == false)
-	{
-		printf("Please enter your GovID\n");
-
-		std::getline(std::cin, govID);
-		validateString = ("SELECT GovID, CName "
-								  "FROM Client "
-								  "WHERE GovID =" + txn.quote(govID));
-
-		if(govID == "?")
-		{
-			lookupPrint(lookupString, txn);
-			continue; //dont run the rest
-		}
-
-		validationResult = txn.exec(validateString);
-//		printf("%lu rows\n", validationResult.size());
-		if(validationResult.size() != 1)
-		{
-			printf("Invalid entry, please try again\n");
-		}
-		else //assume valid
-		{
-			validInput = true;
-			printResult(validationResult);
-		}
-	}
-
-	return std::stoi(govID);
-}
-
 
 std::string getUserInput(pqxx::work& txn,
 						 std::string promptUserString,
@@ -197,7 +158,7 @@ int getInfo(pqxx::work& txn)
 	std::vector<std::string> otherPassengersGovID;
 	std::string lookupString;
 	std::string validateString;
-	while(true)
+	while(loopStatus != "n")
 	{
 		printf("Booking a flight\n");
 		printf("Enter '?' to lookup values\n");
@@ -236,15 +197,7 @@ int getInfo(pqxx::work& txn)
 		printf("When will you be returning?\n");
 		std::getline(std::cin, returnDate);
 
-		lookupString = ("SELECT fid"
-								"FROM flight "
-								"JOIN "
-								"WHERE Model =" + txn.quote(departDate));
 
-//		SELECT * FROM flight
-//		NATURAL JOIN airline --need prefix for flightname
-//		NATURAL JOIN flightname --needed for named
-//		NATURAL JOIN named
 
 		printf("Please enter in a flight from the selections below:?\n");
 //		for (auto row: lookupResult)
@@ -253,15 +206,9 @@ int getInfo(pqxx::work& txn)
 //		}
 		std::getline(std::cin, flightNum);
 
-		printf("Thank you\n\n");
 
-		printf("Book another flight?\n");
+		printf("Thank you\n\nBook another flight?\n");
 		std::getline(std::cin, loopStatus);
-		if(loopStatus == "n")
-		{
-			break;
-		}
-
 	}
 	return 5;
 }
