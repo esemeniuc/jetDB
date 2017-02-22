@@ -1,9 +1,9 @@
 CREATE TABLE Airport (
   AirportCode CHAR(3) PRIMARY KEY,
-  ApName      CHAR(100),
-  SAddress    CHAR(100),
-  City        CHAR(100),
-  Country     CHAR(100)
+  ApName      VARCHAR(100),
+  SAddress    VARCHAR(100),
+  City        VARCHAR(100),
+  Country     VARCHAR(100)
 );
 
 CREATE TABLE Airline (
@@ -44,8 +44,8 @@ CREATE TABLE Named (
 );
 
 CREATE TABLE Client (
-  GovID CHAR(100) PRIMARY KEY,
-  CName CHAR(100)
+  GovID VARCHAR(100) PRIMARY KEY,
+  CName VARCHAR(100)
 );
 
 CREATE TABLE Booking (
@@ -53,8 +53,8 @@ CREATE TABLE Booking (
 );
 
 CREATE TABLE Books (
-  GovID      CHAR(100) REFERENCES Client (GovID) NOT NULL,
-  bID        SERIAL REFERENCES Booking (bID)     NOT NULL,
+  GovID      VARCHAR(100) REFERENCES Client (GovID) NOT NULL,
+  bID        SERIAL REFERENCES Booking (bID)        NOT NULL,
   DateBooked DATE,
   Cost       INT,
   PRIMARY KEY (GovID, bID)
