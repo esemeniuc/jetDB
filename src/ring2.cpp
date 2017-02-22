@@ -22,69 +22,31 @@ bool isValid(std::string validateString, pqxx::work& txn)
 	return (txn.exec(validateString).size() > 0);
 }
 
-
-int getGovID(pqxx::work& txn)
+//prints out result
+void printResult(pqxx::result& printResult)
 {
-	std::string govID;
-
-	std::string lookupString = ("SELECT GovID, CName FROM Client");
-
-	std::string validateString = ("SELECT GovID, CName "
-								  "FROM Client "
-								  "WHERE GovID =" + txn.quote(govID));
-
-	bool validInput = false;
-	while(validInput == false)
-	{
-		printf("Please enter your GovID\n");
-
-		std::getline(std::cin, govID);
-
-		if(govID == "?")
-		{
-			lookupPrint(lookupString, txn);
-		}
-		else if(!isValid(validateString, txn))
-		{
-			printf("Invalid entry, please try again\n");
-		}
-		else
-		{
-			validInput = true;
-			txn.exec(validateString);
-			printf("%s\n", row[0].c_str());
-
-		}
-	}
-
-	return -1;
-}
-
-bool validatePrint(std::string validateString, pqxx::work& txn)
-{
-	pqxx::result validateResult = txn.exec(validateString);
-	if (validateResult.size() == 0)
+	if (printResult.size() == 0)
 	{
 		printf("No results found\n");
 	}
 	else
 	{
-		printf("Found: %lu results\n", validateResult.size());
-		int n = validateResult.columns();
-//		printf("%d columns\n", validateResult.columns());
+		printf("Found: %lu results\n", printResult.size());
+		int n = printResult.columns();
+//		printf("%d columns\n", printResult.columns());
 		for(int i = 0; i < n; i++) //print columns
 		{
 			if(i != n-1)
 			{
-				printf("%s\t", validateResult.column_name(i));
+				printf("%s\t", printResult.column_name(i));
 			}
 			else
 			{
-				printf("%s\n", validateResult.column_name(i));
+				printf("%s\n", printResult.column_name(i));
 			}
 		}
 
-		for (auto row: validateResult) //print results
+		for (auto row: printResult) //print results
 		{
 			for(int i = 0; i < n; i++)
 			{
@@ -100,13 +62,7 @@ bool validatePrint(std::string validateString, pqxx::work& txn)
 		}
 	}
 
-	if(validateResult.size() == 1)
-	{
-		return true;
-	}
-	return false;
 }
-
 
 pqxx::result::size_type lookupPrint(std::string lookupString, pqxx::work& txn)
 {
@@ -150,8 +106,52 @@ pqxx::result::size_type lookupPrint(std::string lookupString, pqxx::work& txn)
 	return lookupResult.size();
 }
 
+int getGovID(pqxx::work& txn)
+{
+	std::string govID;
+
+	std::string lookupString = ("SELECT GovID, CName FROM Client");
+
+	std::string validateString;
+
+	pqxx::result validationResult;
+
+	bool validInput = false;
+	while(validInput == false)
+	{
+		printf("Please enter your GovID\n");
+
+		std::getline(std::cin, govID);
+		validateString = ("SELECT GovID, CName "
+								  "FROM Client "
+								  "WHERE GovID =" + txn.quote(govID));
+
+		if(govID == "?")
+		{
+			lookupPrint(lookupString, txn);
+			continue; //dont run the rest
+		}
+
+		validationResult = txn.exec(validateString);
+//		printf("%lu rows\n", validationResult.size());
+		if(validationResult.size() != 1)
+		{
+			printf("Invalid entry, please try again\n");
+		}
+		else //assume valid
+		{
+			validInput = true;
+			printResult(validationResult);
+		}
+	}
+
+	return std::stoi(govID);
+}
+
+
 int getInfo(pqxx::work& txn)
 {
+	int govID;
 	std::string airline;
 	std::string fromAirport;
 	std::string toAirport;
@@ -167,7 +167,7 @@ int getInfo(pqxx::work& txn)
 		printf("Booking a flight\n");
 		printf("Enter '?' to lookup values\n");
 
-
+		govID = getGovID(txn);
 
 		printf("Which airline would you like to book with?\n");
 		std::getline(std::cin, airline);
