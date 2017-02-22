@@ -146,10 +146,10 @@ int getGovID(pqxx::work& txn)
 
 
 std::string getUserInput(pqxx::work& txn,
-			   std::string promptUserString,
-			   std::string lookupString,
-			   std::string validationString,
-			   int numParamsForValidation)
+						 std::string promptUserString,
+						 std::string lookupString,
+						 std::string validationString,
+						 int numParamsForValidation)
 {
 	std::string userInput;
 	pqxx::result validationResult;
@@ -207,22 +207,27 @@ int getInfo(pqxx::work& txn)
 										 "Please enter your GovID",
 										 "SELECT GovID, CName FROM Client",
 										 ("SELECT GovID, CName "
-										 "FROM Client "
-										 "WHERE GovID = "),
+												 "FROM Client "
+												 "WHERE GovID = "),
 										 1);
 
 		std::string fromAirport = getUserInput(txn,
-										 "From which airport?",
-										 "SELECT GovID, CName FROM Client",
-										 ("SELECT GovID, CName "
-										 "FROM Client "
-										 "WHERE GovID = "),
-										 1);
-//		printf("Which airline would you like to book with?\n");
-//		std::getline(std::cin, airline);
+											   "From which airport? (please enter an airport code)",
+											   "SELECT * FROM Airport ",
+											   ("SELECT AirportCode, APName, City, Country "
+													   "FROM Airport "
+													   "WHERE AirportCode = "),
+											   1);
 
+		std::string toAirport = getUserInput(txn,
+											 "To which airport? (please enter an airport code)",
+											 "SELECT * FROM Airport ",
+											 ("SELECT AirportCode, APName, City, Country "
+													 "FROM Airport "
+													 "WHERE AirportCode = "),
+											 1);
 
-//		printf("To which airport?\n"); //might not need airline because customer might want
+//		printf("Which airline would you like to book with?\n"); //might not need airline because customer might want
 //		std::getline(std::cin, airline); //all airlines
 
 		printf("When will you be departing?\n");
@@ -232,9 +237,9 @@ int getInfo(pqxx::work& txn)
 		std::getline(std::cin, returnDate);
 
 		lookupString = ("SELECT fid"
-						"FROM flight "
-						"JOIN "
-						"WHERE Model =" + txn.quote(departDate));
+								"FROM flight "
+								"JOIN "
+								"WHERE Model =" + txn.quote(departDate));
 
 //		SELECT * FROM flight
 //		NATURAL JOIN airline --need prefix for flightname
