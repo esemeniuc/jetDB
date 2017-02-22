@@ -11,4 +11,10 @@ void printResult(pqxx::result& printResult);
 
 int getGovID(pqxx::work& txn);
 
+std::string getUserInput(pqxx::work& txn,
+						 std::string promptUserString,
+						 std::string lookupString,
+						 std::string validationString,
+						 int numParamsForValidation);
+
 int getInfo(pqxx::work& txn);

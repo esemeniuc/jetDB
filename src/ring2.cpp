@@ -61,7 +61,6 @@ void printResult(pqxx::result& printResult)
 			}
 		}
 	}
-
 }
 
 pqxx::result::size_type lookupPrint(std::string lookupString, pqxx::work& txn)
@@ -109,11 +108,8 @@ pqxx::result::size_type lookupPrint(std::string lookupString, pqxx::work& txn)
 int getGovID(pqxx::work& txn)
 {
 	std::string govID;
-
 	std::string lookupString = ("SELECT GovID, CName FROM Client");
-
 	std::string validateString;
-
 	pqxx::result validationResult;
 
 	bool validInput = false;
@@ -149,6 +145,45 @@ int getGovID(pqxx::work& txn)
 }
 
 
+std::string getUserInput(pqxx::work& txn,
+			   std::string promptUserString,
+			   std::string lookupString,
+			   std::string validationString,
+			   int numParamsForValidation)
+{
+	std::string userInput;
+	pqxx::result validationResult;
+
+	bool validInput = false;
+	while(validInput == false)
+	{
+		printf("%s\n", promptUserString.c_str());
+
+		std::getline(std::cin, userInput);
+
+		if(userInput == "?")
+		{
+			lookupPrint(lookupString, txn);
+			continue; //don't run the rest
+		}
+
+		validationResult = txn.exec(validationString + txn.quote(userInput));
+		printf("%lu rows\n", validationResult.size());
+		if(validationResult.size() != 1)
+		{
+			printf("Invalid entry, please try again\n");
+		}
+		else //assume valid
+		{
+			validInput = true;
+			printResult(validationResult);
+		}
+	}
+
+	return userInput;
+}
+
+
 int getInfo(pqxx::work& txn)
 {
 	int govID;
@@ -167,13 +202,25 @@ int getInfo(pqxx::work& txn)
 		printf("Booking a flight\n");
 		printf("Enter '?' to lookup values\n");
 
-		govID = getGovID(txn);
+//		govID = getGovID(txn);
+		std::string govID = getUserInput(txn,
+										 "Please enter your GovID",
+										 "SELECT GovID, CName FROM Client",
+										 ("SELECT GovID, CName "
+										 "FROM Client "
+										 "WHERE GovID = "),
+										 1);
 
-		printf("Which airline would you like to book with?\n");
-		std::getline(std::cin, airline);
+		std::string fromAirport = getUserInput(txn,
+										 "From which airport?",
+										 "SELECT GovID, CName FROM Client",
+										 ("SELECT GovID, CName "
+										 "FROM Client "
+										 "WHERE GovID = "),
+										 1);
+//		printf("Which airline would you like to book with?\n");
+//		std::getline(std::cin, airline);
 
-		printf("From which airport?\n");
-		std::getline(std::cin, fromAirport);
 
 //		printf("To which airport?\n"); //might not need airline because customer might want
 //		std::getline(std::cin, airline); //all airlines
