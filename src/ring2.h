@@ -9,8 +9,6 @@ pqxx::result::size_type lookupPrint(std::string lookupString, pqxx::work& txn);
 
 void printResult(pqxx::result& printResult);
 
-int getGovID(pqxx::work& txn);
-
 std::string getUserInput(pqxx::work& txn,
 						 std::string promptUserString,
 						 std::string lookupString,
