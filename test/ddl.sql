@@ -8,13 +8,13 @@ CREATE TABLE Airport (
 
 CREATE TABLE Airline (
   Prefix CHAR(3) PRIMARY KEY,
-  AlName CHAR(50)
+  AlName VARCHAR(50)
 );
 
 CREATE TABLE Plane (
   pID      SERIAL PRIMARY KEY,
   Prefix   CHAR(3) REFERENCES Airline (Prefix),
-  Model    CHAR(50),
+  Model    VARCHAR(50),
   Capacity SMALLINT,
   MaxRange SMALLINT
 );
