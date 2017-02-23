@@ -11,6 +11,6 @@ int main(int argc, char** argv)
 	pqxx::work txn(c);
 
 
-	int userinfo = getInfo(txn);
+	int userInfo = getBookingInfo(txn);
 
 }

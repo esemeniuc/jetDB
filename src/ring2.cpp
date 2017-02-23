@@ -34,7 +34,7 @@ void printResult(pqxx::result& printResult)
 		printf("Found: %lu results\n", printResult.size());
 		int n = printResult.columns();
 //		printf("%d columns\n", printResult.columns());
-		for(int i = 0; i < n; i++) //print columns
+		for(pqxx::tuple_size_type i = 0; i < n; i++) //print columns
 		{
 			if(i != n-1)
 			{
@@ -75,7 +75,7 @@ pqxx::result::size_type lookupPrint(std::string lookupString, pqxx::work& txn)
 		printf("Found: %lu results\n", lookupResult.size());
 		int n = lookupResult.columns();
 //		printf("%d columns\n", lookupResult.columns());
-		for(int i = 0; i < n; i++) //print columns
+		for(pqxx::tuple_size_type i = 0; i < n; i++) //print columns
 		{
 			if(i != n-1)
 			{
@@ -145,76 +145,166 @@ std::string getUserInput(pqxx::work& txn,
 }
 
 
-int getInfo(pqxx::work& txn)
+//get date in 2016-10-16 23:39:37.000000 format
+std::string getDate(std::string promptUserString)
 {
-	std::string airline;
+	std::string timeString;
+	std::string userInput;
+	int temp = 0;
+	bool validInput = false;
+
+	printf("%s\n", promptUserString.c_str());
+
+	while(temp < 2015 || temp > 2020) //get year
+	{
+		printf("Please enter in a year (2015 to 2020)\n");
+		std::getline(std::cin, userInput);
+
+		try
+		{
+			temp = std::stoi(userInput);
+		} catch (const std::invalid_argument& ia)
+		{
+			printf("Non numeric input received\n");
+			continue;
+		}
+	}
+	timeString += std::to_string(temp) + "-";
+
+	while(temp < 1 || temp > 12) //get month
+	{
+		printf("Please enter in a month (1 to 12)\n");
+		std::getline(std::cin, userInput);
+
+		try
+		{
+			temp = std::stoi(userInput);
+		} catch (const std::invalid_argument& ia)
+		{
+			printf("Non numeric input received\n");
+			continue;
+		}
+	}
+	timeString += std::to_string(temp) + "-";
+
+	while(temp < 1 || temp > 31) //get day
+	{
+		printf("Please enter in a day (1 to 31)\n");
+		std::getline(std::cin, userInput);
+
+		try
+		{
+			temp = std::stoi(userInput);
+		} catch (const std::invalid_argument& ia)
+		{
+			printf("Non numeric input received\n");
+			continue;
+		}
+	}
+	timeString += std::to_string(temp) + " ";
+
+	while(temp < 0 || temp > 23) //get hour
+	{
+		printf("Please enter in an hour (0 to 23)\n");
+		std::getline(std::cin, userInput);
+
+		try
+		{
+			temp = std::stoi(userInput);
+		} catch (const std::invalid_argument& ia)
+		{
+			printf("Non numeric input received\n");
+			continue;
+		}
+	}
+	timeString += std::to_string(temp) + ":";
+
+	while(temp < 0 || temp > 59) //get minute
+	{
+		printf("Please enter in a minute (0 to 59)\n");
+		std::getline(std::cin, userInput);
+
+		try
+		{
+			temp = std::stoi(userInput);
+		} catch (const std::invalid_argument& ia)
+		{
+			printf("Non numeric input received\n");
+			continue;
+		}
+	}
+	timeString += std::to_string(temp) + ":00.000000";
+
+	return timeString;
+}
+
+
+
+int getBookingInfo(pqxx::work& txn)
+{
+	std::string govID;
 	std::string fromAirport;
 	std::string toAirport;
 	std::string departDate;
 	std::string returnDate;
-	std::string flightNum;
+	std::string flightQuery;
 	std::string loopStatus;
-	std::vector<std::string> otherPassengersGovID;
-	std::string lookupString;
-	std::string validateString;
+//	std::vector<std::string> otherPassengersGovID;
 	while(loopStatus != "n")
 	{
 		printf("Booking a flight\n");
 		printf("Enter '?' to lookup acceptable input\n");
 
-		std::string fromAirport = getUserInput(txn,
-											   "From which airport? (please enter an airport code)",
-											   "SELECT * FROM Airport ",
-											   ("SELECT AirportCode, APName, City, Country "
-													   "FROM Airport "
-													   "WHERE AirportCode = "),
-											   1);
+		fromAirport = getUserInput(txn,
+								   "From which airport? (please enter an airport code)",
+								   "SELECT * FROM Airport ",
+								   ("SELECT AirportCode, APName, City, Country "
+										   "FROM Airport "
+										   "WHERE AirportCode = "),
+								   1);
 
-		std::string toAirport = getUserInput(txn,
-											 "To which airport? (please enter an airport code)",
-											 "SELECT * FROM Airport ",
-											 ("SELECT AirportCode, APName, City, Country "
-													 "FROM Airport "
-													 "WHERE AirportCode = "),
-											 1);
+		toAirport = getUserInput(txn,
+								 "To which airport? (please enter an airport code)",
+								 "SELECT * FROM Airport ",
+								 ("SELECT AirportCode, APName, City, Country "
+										 "FROM Airport "
+										 "WHERE AirportCode = "),
+								 1);
 
 //		printf("Which airline would you like to book with?\n"); //might not need airline because customer might want
 //		std::getline(std::cin, airline); //all airlines
 
-		printf("When will you be departing?\n");
-		std::getline(std::cin, departDate);
-
-		printf("When will you be returning?\n");
-		std::getline(std::cin, returnDate);
+		departDate = getDate("When will you be departing");
+		returnDate = getDate("When will you be departing");
 
 		//list all flights
 		printf("Please enter in a flight from the selections below:?\n");
 
 		//make query based on all the where conditions
 		//from, to airport code, based on the 2 date ranges
-		std::string flightQuery = "SELECT CONCAT(flight.prefix, flightname.flightnum) AS flightname, "
-		"airline.alname, flight.starttime, flight.endtime FROM flight "
-		"NATURAL JOIN named "
-		"NATURAL JOIN flightname "
-		"NATURAL JOIN airline "
-		"WHERE fromairportcode = " + txn.quote(fromAirport) +
-		" AND toairportcode = " + txn.quote(toAirport) +
-		" AND starttime >= " + txn.quote(departDate) +
-		" AND endtime <= " + txn.quote(returnDate);
+		flightQuery = "SELECT CONCAT(flight.prefix, flightname.flightnum) AS flightname, "
+										  "airline.alname, flight.starttime, flight.endtime FROM flight "
+										  "NATURAL JOIN named "
+										  "NATURAL JOIN flightname "
+										  "NATURAL JOIN airline "
+										  "WHERE fromairportcode = " + txn.quote(fromAirport) +
+								  " AND toairportcode = " + txn.quote(toAirport) +
+								  " AND starttime >= " + txn.quote(departDate) +
+								  " AND endtime <= " + txn.quote(returnDate);
 
-		printf("%s\n", flightQuery.c_str());
+//		printf("%s\n", flightQuery.c_str());
 		pqxx::result flightResult = txn.exec(flightQuery);
 		printResult(flightResult);
 
-//		std::getline(std::cin, flightNum);
+		govID = getUserInput(txn,
+							 "Please enter your GovID",
+							 "SELECT GovID, CName FROM Client",
+							 ("SELECT GovID, CName "
+									 "FROM Client "
+									 "WHERE GovID = "),
+							 1);
 
-		std::string govID = getUserInput(txn,
-										 "Please enter your GovID",
-										 "SELECT GovID, CName FROM Client",
-										 ("SELECT GovID, CName "
-												 "FROM Client "
-												 "WHERE GovID = "),
-										 1);
+//		bookFlightByID()
 
 		printf("Thank you\n\nBook another flight?\n");
 		std::getline(std::cin, loopStatus);
