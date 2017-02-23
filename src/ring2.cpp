@@ -147,7 +147,6 @@ std::string getUserInput(pqxx::work& txn,
 
 int getInfo(pqxx::work& txn)
 {
-	int govID;
 	std::string airline;
 	std::string fromAirport;
 	std::string toAirport;
@@ -161,16 +160,7 @@ int getInfo(pqxx::work& txn)
 	while(loopStatus != "n")
 	{
 		printf("Booking a flight\n");
-		printf("Enter '?' to lookup values\n");
-
-//		govID = getGovID(txn);
-		std::string govID = getUserInput(txn,
-										 "Please enter your GovID",
-										 "SELECT GovID, CName FROM Client",
-										 ("SELECT GovID, CName "
-												 "FROM Client "
-												 "WHERE GovID = "),
-										 1);
+		printf("Enter '?' to lookup acceptable input\n");
 
 		std::string fromAirport = getUserInput(txn,
 											   "From which airport? (please enter an airport code)",
@@ -197,18 +187,38 @@ int getInfo(pqxx::work& txn)
 		printf("When will you be returning?\n");
 		std::getline(std::cin, returnDate);
 
-
-
+		//list all flights
 		printf("Please enter in a flight from the selections below:?\n");
-//		for (auto row: lookupResult)
-//		{
-//			printf("%s\n", row[0].c_str());
-//		}
-		std::getline(std::cin, flightNum);
 
+		//make query based on all the where conditions
+		//from, to airport code, based on the 2 date ranges
+		std::string flightQuery = "SELECT CONCAT(flight.prefix, flightname.flightnum) AS flightname, "
+		"airline.alname, flight.starttime, flight.endtime FROM flight "
+		"NATURAL JOIN named "
+		"NATURAL JOIN flightname "
+		"NATURAL JOIN airline "
+		"WHERE fromairportcode = " + txn.quote(fromAirport) +
+		" AND toairportcode = " + txn.quote(toAirport) +
+		" AND starttime >= " + txn.quote(departDate) +
+		" AND endtime <= " + txn.quote(returnDate);
+
+		printf("%s\n", flightQuery.c_str());
+		pqxx::result flightResult = txn.exec(flightQuery);
+		printResult(flightResult);
+
+//		std::getline(std::cin, flightNum);
+
+		std::string govID = getUserInput(txn,
+										 "Please enter your GovID",
+										 "SELECT GovID, CName FROM Client",
+										 ("SELECT GovID, CName "
+												 "FROM Client "
+												 "WHERE GovID = "),
+										 1);
 
 		printf("Thank you\n\nBook another flight?\n");
 		std::getline(std::cin, loopStatus);
 	}
-	return 5;
+
+	return 0;
 }
