@@ -150,12 +150,12 @@ std::string getDate(std::string promptUserString)
 {
 	std::string timeString;
 	std::string userInput;
-	int temp = 0;
+	int temp;
 	bool validInput = false;
 
 	printf("%s\n", promptUserString.c_str());
 
-	while(temp < 2015 || temp > 2020) //get year
+	do //get year
 	{
 		printf("Please enter in a year (2015 to 2020)\n");
 		std::getline(std::cin, userInput);
@@ -168,10 +168,11 @@ std::string getDate(std::string promptUserString)
 			printf("Non numeric input received\n");
 			continue;
 		}
-	}
+	} while(temp < 2015 || temp > 2020);
 	timeString += std::to_string(temp) + "-";
+	temp = -1; //reset temp
 
-	while(temp < 1 || temp > 12) //get month
+	do //get month
 	{
 		printf("Please enter in a month (1 to 12)\n");
 		std::getline(std::cin, userInput);
@@ -184,10 +185,10 @@ std::string getDate(std::string promptUserString)
 			printf("Non numeric input received\n");
 			continue;
 		}
-	}
+	} while(temp < 1 || temp > 12);
 	timeString += std::to_string(temp) + "-";
 
-	while(temp < 1 || temp > 31) //get day
+	do //get day
 	{
 		printf("Please enter in a day (1 to 31)\n");
 		std::getline(std::cin, userInput);
@@ -200,10 +201,10 @@ std::string getDate(std::string promptUserString)
 			printf("Non numeric input received\n");
 			continue;
 		}
-	}
+	} while(temp < 1 || temp > 31);
 	timeString += std::to_string(temp) + " ";
 
-	while(temp < 0 || temp > 23) //get hour
+	do //get hour
 	{
 		printf("Please enter in an hour (0 to 23)\n");
 		std::getline(std::cin, userInput);
@@ -216,10 +217,10 @@ std::string getDate(std::string promptUserString)
 			printf("Non numeric input received\n");
 			continue;
 		}
-	}
+	}while(temp < 0 || temp > 23);
 	timeString += std::to_string(temp) + ":";
 
-	while(temp < 0 || temp > 59) //get minute
+	do //get minute
 	{
 		printf("Please enter in a minute (0 to 59)\n");
 		std::getline(std::cin, userInput);
@@ -232,8 +233,8 @@ std::string getDate(std::string promptUserString)
 			printf("Non numeric input received\n");
 			continue;
 		}
-	}
-	timeString += std::to_string(temp) + ":00.000000";
+	} while(temp < 0 || temp > 59);
+	timeString += std::to_string(temp) + ":00"; //don't worry about seconds
 
 	return timeString;
 }
@@ -250,7 +251,7 @@ int getBookingInfo(pqxx::work& txn)
 	std::string flightQuery;
 	std::string loopStatus;
 //	std::vector<std::string> otherPassengersGovID;
-	while(loopStatus != "n")
+	do
 	{
 		printf("Booking a flight\n");
 		printf("Enter '?' to lookup acceptable input\n");
@@ -275,7 +276,9 @@ int getBookingInfo(pqxx::work& txn)
 //		std::getline(std::cin, airline); //all airlines
 
 		departDate = getDate("When will you be departing");
-		returnDate = getDate("When will you be departing");
+//		printf("%s\n", departDate.c_str());
+		returnDate = getDate("When will you be returning");
+//		printf("%s\n", returnDate.c_str());
 
 		//list all flights
 		printf("Please enter in a flight from the selections below:?\n");
@@ -308,7 +311,7 @@ int getBookingInfo(pqxx::work& txn)
 
 		printf("Thank you\n\nBook another flight?\n");
 		std::getline(std::cin, loopStatus);
-	}
+	} while(loopStatus != "n");
 
 	return 0;
 }
