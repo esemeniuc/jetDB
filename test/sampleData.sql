@@ -10,17 +10,17 @@ INSERT INTO Airline (Prefix,AlName) VALUES ('CSN','China Southern Airlines');
 INSERT INTO Airline (Prefix,AlName) VALUES ('DLH','Lufthansa');
 INSERT INTO Airline (Prefix,AlName) VALUES ('JAL','Japan Airlines');
 
-INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES ('1','DAL','Boeing 747','660','7260');
-INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES ('2','DAL','Airbus A380','544','8500');
-INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES ('3','UAE','Boeing 777','396','8555');
-INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES ('4','JAL','Boeing 737','215','3000');
-INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES ('5','DLH','Airbus A320','220','3300');
+INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES(DEFAULT,'DAL','Boeing 747','660','7260');
+INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES(DEFAULT,'DAL','Airbus A380','544','8500');
+INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES(DEFAULT,'UAE','Boeing 777','396','8555');
+INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES(DEFAULT,'JAL','Boeing 737','215','3000');
+INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES(DEFAULT,'DLH','Airbus A320','220','3300');
 
-INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES ('1','1','DAL','JFK','YVR','2016-10-15 23:39:37','2016-10-16 23:39:37');
-INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES ('2','1','DAL','YVR','JFK','2015-04-01 10:20:31','2015-04-01 14:20:31');
-INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES ('3','5','DLH','CDG','LHR','2016-11-15 15:53:49','2016-11-15 19:53:49');
-INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES ('4','5','DLH','LHR','CDG','2015-07-20 0:11:03','2015-07-20 10:11:03');
-INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES ('5','4','JAL','JFK','NRT','2015-05-23 22:04:48','2015-05-24 12:04:48');
+INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES(DEFAULT,'1','DAL','JFK','YVR','2016-10-15 23:39:37','2016-10-16 23:39:37');
+INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES(DEFAULT,'1','DAL','YVR','JFK','2015-04-01 10:20:31','2015-04-01 14:20:31');
+INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES(DEFAULT,'5','DLH','CDG','LHR','2016-11-15 15:53:49','2016-11-15 19:53:49');
+INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES(DEFAULT,'5','DLH','LHR','CDG','2015-07-20 0:11:03','2015-07-20 10:11:03');
+INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES(DEFAULT,'4','JAL','JFK','NRT','2015-05-23 22:04:48','2015-05-24 12:04:48');
 
 INSERT INTO FlightName (FlightNum,Prefix) VALUES ('111','DAL');
 INSERT INTO FlightName (FlightNum,Prefix) VALUES ('222','DLH');
@@ -41,11 +41,11 @@ INSERT INTO Client (GovID,CName) VALUES ('33334444','Jane Woodfield');
 INSERT INTO Client (GovID,CName) VALUES ('44445555','Friðrik Osamu');
 INSERT INTO Client (GovID,CName) VALUES ('55556666','Krystyn Gopal');
 
-INSERT INTO Booking (bID) VALUES ('1');
-INSERT INTO Booking (bID) VALUES ('2');
-INSERT INTO Booking (bID) VALUES ('3');
-INSERT INTO Booking (bID) VALUES ('4');
-INSERT INTO Booking (bID) VALUES ('5');
+INSERT INTO Booking (bID) VALUES (DEFAULT);
+INSERT INTO Booking (bID) VALUES (DEFAULT);
+INSERT INTO Booking (bID) VALUES (DEFAULT);
+INSERT INTO Booking (bID) VALUES (DEFAULT);
+INSERT INTO Booking (bID) VALUES (DEFAULT);
 
 INSERT INTO Books (GovID,bID,DateBooked,Cost) VALUES ('22223333','1','2016-12-31 22:05:49','544');
 INSERT INTO Books (GovID,bID,DateBooked,Cost) VALUES ('44445555','2','2015-05-06 4:58:54','123');
@@ -58,4 +58,3 @@ INSERT INTO Booked (bID,fID) VALUES ('1','2');
 INSERT INTO Booked (bID,fID) VALUES ('2','5');
 INSERT INTO Booked (bID,fID) VALUES ('3','4');
 INSERT INTO Booked (bID,fID) VALUES ('3','3');
-
