@@ -11,8 +11,20 @@
 //preconditions: GovID in db
 //description: use to book a flight after acquiring all valid user info from interactive prompt or GUI
 //postconditions: returns 0 on successful booking, nonzero otherwise
-int bookFlightByID(std::string GovID, int DateBooked, std::vector<int> flightID)
+int bookFlightByID(pqxx::work& txn, std::tuple<std::string, std::string, std::vector<std::string>>)
 {
+	//unpack data
+	//get<0> = govID
+	//get<1> = flightID
+	//get<2> = otherPassengerGovIDs
+
+
+	//insert into db
+	std::string bookingInsert = "INSERT INTO booking (bid) VALUES (DEFAULT) RETURNING bid";
+
+	pqxx::result = txn.exec(bookingInsert);
+
+	std::string booksInsert = "INSERT INTO books (bid) VALUES (DEFAULT) RETURNING bid";
 
 	return 1;
 }
@@ -22,8 +34,8 @@ bool isValid(std::string validateString, pqxx::work& txn)
 	return (txn.exec(validateString).size() > 0);
 }
 
-//prints out result
-void printResult(pqxx::result& printResult)
+//prints out result of a query
+void printResult(const pqxx::result& printResult)
 {
 	if (printResult.size() == 0)
 	{
@@ -63,6 +75,7 @@ void printResult(pqxx::result& printResult)
 	}
 }
 
+//prints out the contents and returns the # of rows
 pqxx::result::size_type lookupPrint(std::string lookupString, pqxx::work& txn)
 {
 	pqxx::result lookupResult = txn.exec(lookupString);
@@ -105,7 +118,7 @@ pqxx::result::size_type lookupPrint(std::string lookupString, pqxx::work& txn)
 	return lookupResult.size();
 }
 
-
+//generic function for getting a field
 std::string getUserInput(pqxx::work& txn,
 						 std::string promptUserString,
 						 std::string lookupString,
@@ -116,7 +129,7 @@ std::string getUserInput(pqxx::work& txn,
 	pqxx::result validationResult;
 
 	bool validInput = false;
-	while(validInput == false)
+	do
 	{
 		printf("%s\n", promptUserString.c_str());
 
@@ -129,7 +142,6 @@ std::string getUserInput(pqxx::work& txn,
 		}
 
 		validationResult = txn.exec(validationString + txn.quote(userInput));
-		printf("%lu rows\n", validationResult.size());
 		if(validationResult.size() != 1)
 		{
 			printf("Invalid entry, please try again\n");
@@ -139,7 +151,7 @@ std::string getUserInput(pqxx::work& txn,
 			validInput = true;
 			printResult(validationResult);
 		}
-	}
+	} while(validInput == false);
 
 	return userInput;
 }
@@ -239,65 +251,110 @@ std::string getDate(std::string promptUserString)
 	return timeString;
 }
 
+//make query based on all the where conditions
+//from, to airport code, based on the 2 date ranges
+//returns the flight no
+std::string getFlight(pqxx::work& txn,
+			  std::string promptUserString,
+			  const std::string& fromAirport,
+			  const std::string& toAirport,
+			  const std::string& departDate,
+			  const std::string& returnDate)
+{
+	bool validInput;
+	std::string userInput;
+	std::string lookupString = "SELECT fid, CONCAT(flight.prefix, flightname.flightnum) AS flightname, "
+									   "airline.alname, flight.starttime, flight.endtime FROM flight "
+									   "NATURAL JOIN named "
+									   "NATURAL JOIN flightname "
+									   "NATURAL JOIN airline "
+									   "WHERE fromairportcode = " + txn.quote(fromAirport) +
+							   " AND toairportcode = " + txn.quote(toAirport) +
+							   " AND starttime >= " + txn.quote(departDate) +
+							   " AND endtime <= " + txn.quote(returnDate);
 
+	std::string validationString = "SELECT fid, CONCAT(flight.prefix, flightname.flightnum) AS flightname, "
+									"airline.alname, flight.starttime, flight.endtime FROM flight "
+									"NATURAL JOIN named "
+									"NATURAL JOIN flightname "
+									"NATURAL JOIN airline "
+									"WHERE flight.fid = ";
 
-int getBookingInfo(pqxx::work& txn)
+	do //list all flights
+	{
+		printf("%s\n", promptUserString.c_str());
+		std::getline(std::cin, userInput); //expecting in put for a flight id
+
+		if(userInput == "?")
+		{
+			lookupPrint(lookupString, txn);
+			continue; //don't run the rest
+		}
+
+		pqxx::result validationResult = txn.exec(validationString + txn.quote(userInput));
+		if(validationResult.size() != 1)
+		{
+			printf("Invalid entry, please try again\n");
+		}
+		else //assume valid
+		{
+			validInput = true;
+			printResult(validationResult);
+		}
+	} while(validInput == false);
+
+	return userInput;
+}
+
+std::tuple<std::string, std::string, std::vector<std::string>> getBookingInfo(pqxx::work& txn)
 {
 	std::string govID;
 	std::string fromAirport;
 	std::string toAirport;
 	std::string departDate;
 	std::string returnDate;
-	std::string flightQuery;
+	std::string flightID;
 	std::string loopStatus;
-//	std::vector<std::string> otherPassengersGovID;
+	std::vector<std::string> otherPassengersGovID;
 	do
 	{
 		printf("Booking a flight\n");
 		printf("Enter '?' to lookup acceptable input\n");
 
-		fromAirport = getUserInput(txn,
-								   "From which airport? (please enter an airport code)",
-								   "SELECT * FROM Airport ",
-								   ("SELECT AirportCode, APName, City, Country "
-										   "FROM Airport "
-										   "WHERE AirportCode = "),
-								   1);
-
-		toAirport = getUserInput(txn,
-								 "To which airport? (please enter an airport code)",
-								 "SELECT * FROM Airport ",
-								 ("SELECT AirportCode, APName, City, Country "
-										 "FROM Airport "
-										 "WHERE AirportCode = "),
-								 1);
-
-//		printf("Which airline would you like to book with?\n"); //might not need airline because customer might want
-//		std::getline(std::cin, airline); //all airlines
-
-		departDate = getDate("When will you be departing");
-//		printf("%s\n", departDate.c_str());
-		returnDate = getDate("When will you be returning");
-//		printf("%s\n", returnDate.c_str());
-
-		//list all flights
-		printf("Please enter in a flight from the selections below:?\n");
-
-		//make query based on all the where conditions
-		//from, to airport code, based on the 2 date ranges
-		flightQuery = "SELECT CONCAT(flight.prefix, flightname.flightnum) AS flightname, "
-										  "airline.alname, flight.starttime, flight.endtime FROM flight "
-										  "NATURAL JOIN named "
-										  "NATURAL JOIN flightname "
-										  "NATURAL JOIN airline "
-										  "WHERE fromairportcode = " + txn.quote(fromAirport) +
-								  " AND toairportcode = " + txn.quote(toAirport) +
-								  " AND starttime >= " + txn.quote(departDate) +
-								  " AND endtime <= " + txn.quote(returnDate);
-
-//		printf("%s\n", flightQuery.c_str());
-		pqxx::result flightResult = txn.exec(flightQuery);
-		printResult(flightResult);
+//		fromAirport = getUserInput(txn,
+//								   "From which airport? (please enter an airport code)",
+//								   "SELECT * FROM Airport ",
+//								   ("SELECT AirportCode, APName, City, Country "
+//										   "FROM Airport "
+//										   "WHERE AirportCode = "),
+//								   1);
+//
+//		toAirport = getUserInput(txn,
+//								 "To which airport? (please enter an airport code)",
+//								 "SELECT * FROM Airport ",
+//								 ("SELECT AirportCode, APName, City, Country "
+//										 "FROM Airport "
+//										 "WHERE AirportCode = "),
+//								 1);
+//
+////		printf("Which airline would you like to book with?\n"); //might not need airline because customer might want
+////		std::getline(std::cin, airline); //all airlines
+//
+//		departDate = getDate("When will you be departing");
+////		printf("%s\n", departDate.c_str());
+//		returnDate = getDate("When will you be returning");
+////		printf("%s\n", returnDate.c_str());
+//
+//
+//		//get flight info
+//		int flightCode =
+//				getFlight(txn, "Please enter in a flight id (? to list all flights):",
+//						  fromAirport, toAirport,
+//						  departDate, returnDate);
+		flightID =
+				getFlight(txn, "Please enter in a flight id (? to list all flights):",
+						  "JFK", "YVR",
+						  "2015-01-01 00:00:00", "2020-12-31 00:00:00"); //for testing
 
 		govID = getUserInput(txn,
 							 "Please enter your GovID",
@@ -307,11 +364,10 @@ int getBookingInfo(pqxx::work& txn)
 									 "WHERE GovID = "),
 							 1);
 
-//		bookFlightByID()
-
 		printf("Thank you\n\nBook another flight?\n");
 		std::getline(std::cin, loopStatus);
 	} while(loopStatus != "n");
 
-	return 0;
+	return std::tie(govID, flightID, otherPassengersGovID); //get booking holder govID, flightID, and other
+	// passengers govID
 }
