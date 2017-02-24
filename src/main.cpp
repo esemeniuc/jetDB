@@ -11,6 +11,7 @@ int main(int argc, char** argv)
 	pqxx::work txn(c);
 
 
-	int userInfo = getBookingInfo(txn);
+	std::tuple<std::string, std::string, std::vector<std::string>> userInfo = getBookingInfo(txn);
 
+	int bookingStatus = bookFlightByID(txn, userInfo);
 }

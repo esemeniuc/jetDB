@@ -1,11 +1,11 @@
 //
 // Created by eric on 2/18/17.
 //
-int bookFlightByID(std::string GovID, int DateBooked, std::vector<int> flightID);
+int bookFlightByID(pqxx::work& txn, std::tuple<std::string, std::string, std::vector<std::string>>);
 
 bool isValid(std::string validateString, pqxx::work& txn);
 
-void printResult(pqxx::result& printResult);
+void printResult(const pqxx::result& printResult);
 
 pqxx::result::size_type lookupPrint(std::string lookupString, pqxx::work& txn);
 
@@ -17,4 +17,11 @@ std::string getUserInput(pqxx::work& txn,
 
 std::string getDate(std::string promptUserString);
 
-int getBookingInfo(pqxx::work& txn);
+std::string getFlight(pqxx::work& txn,
+											  std::string promptUserString,
+											  const std::string& fromAirport,
+											  const std::string& toAirport,
+											  const std::string& departDate,
+											  const std::string& returnDate);
+
+std::tuple<std::string, std::string, std::vector<std::string>> getBookingInfo(pqxx::work& txn);
