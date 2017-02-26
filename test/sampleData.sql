@@ -16,11 +16,11 @@ INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES(DEFAULT,'UAE','Boe
 INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES(DEFAULT,'JAL','Boeing 737','215','3000');
 INSERT INTO Plane (pID,Prefix,Model,Capacity,MaxRange) VALUES(DEFAULT,'DLH','Airbus A320','220','3300');
 
-INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES(DEFAULT,'1','DAL','JFK','YVR','2016-10-15 23:39:37','2016-10-16 23:39:37');
-INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES(DEFAULT,'1','DAL','YVR','JFK','2015-04-01 10:20:31','2015-04-01 14:20:31');
-INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES(DEFAULT,'5','DLH','CDG','LHR','2016-11-15 15:53:49','2016-11-15 19:53:49');
-INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES(DEFAULT,'5','DLH','LHR','CDG','2015-07-20 0:11:03','2015-07-20 10:11:03');
-INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime) VALUES(DEFAULT,'4','JAL','JFK','NRT','2015-05-23 22:04:48','2015-05-24 12:04:48');
+INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime,Cost) VALUES(DEFAULT,'1','DAL','JFK','YVR','2016-10-15 23:39:37','2016-10-16 23:39:37',500);
+INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime,Cost) VALUES(DEFAULT,'1','DAL','YVR','JFK','2015-04-01 10:20:31','2015-04-01 14:20:31',600);
+INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime,Cost) VALUES(DEFAULT,'5','DLH','CDG','LHR','2016-11-15 15:53:49','2016-11-15 19:53:49',200);
+INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime,Cost) VALUES(DEFAULT,'5','DLH','LHR','CDG','2015-07-20 0:11:03','2015-07-20 10:11:03',300);
+INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime,Cost) VALUES(DEFAULT,'4','JAL','JFK','NRT','2015-05-23 22:04:48','2015-05-24 12:04:48',1000);
 
 INSERT INTO FlightName (FlightNum,Prefix) VALUES ('111','DAL');
 INSERT INTO FlightName (FlightNum,Prefix) VALUES ('222','DLH');

@@ -26,7 +26,8 @@ CREATE TABLE Flight (
   FromAirportCode CHAR(3) REFERENCES Airport (AirportCode),
   ToAirportCode   CHAR(3) REFERENCES Airport (AirportCode),
   StartTime       TIMESTAMP,
-  EndTime         TIMESTAMP
+  EndTime         TIMESTAMP,
+  Cost            SMALLINT
 );
 
 CREATE TABLE FlightName (
