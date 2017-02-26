@@ -8,10 +8,21 @@
 int main(int argc, char** argv)
 {
 	pqxx::connection c("dbname=postgres user=postgres password= hostname=localhost");
-	pqxx::work txn(c);
+	std::string loopStatus;
 
+	//book stuff
 
-	std::tuple<std::string, std::string, std::vector<std::string>> userInfo = getBookingInfo(txn);
+	do
+	{
+		printf("Booking a flight (enter 'n' to quit)\n");
+		printf("Enter '?' to lookup acceptable input\n");
+		std::tuple<std::vector<std::string>, std::vector<std::string>> userInfo = getBookingInfo(c);
 
-	int bookingStatus = bookFlightByID(txn, userInfo);
+		int bookingStatus = bookFlightByID(c, userInfo);
+
+		printf("booking status: %d\n", bookingStatus);
+
+		printf("Thank you\n\nBook another flight?\n");
+		std::getline(std::cin, loopStatus);
+	} while(loopStatus != "n");
 }
