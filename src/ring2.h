@@ -1,7 +1,7 @@
 //
 // Created by eric on 2/18/17.
 //
-int bookFlightByID(pqxx::work& txn, std::tuple<std::string, std::string, std::vector<std::string>>);
+int bookFlightByID(pqxx::connection_base& c, std::tuple<std::vector<std::string>, std::vector<std::string>> userInfo);
 
 bool isValid(std::string validateString, pqxx::work& txn);
 
@@ -17,11 +17,14 @@ std::string getUserInput(pqxx::work& txn,
 
 std::string getDate(std::string promptUserString);
 
-std::string getFlight(pqxx::work& txn,
-											  std::string promptUserString,
-											  const std::string& fromAirport,
-											  const std::string& toAirport,
-											  const std::string& departDate,
-											  const std::string& returnDate);
+int getFlight(pqxx::work& txn,
+			  std::string promptUserString,
+			  std::vector<std::string>& flightIDList,
+			  const std::string& fromAirport,
+			  const std::string& toAirport,
+			  const std::string& departDate,
+			  const std::string& returnDate);
 
-std::tuple<std::string, std::string, std::vector<std::string>> getBookingInfo(pqxx::work& txn);
+int getGovIDs(pqxx::work& txn, std::string promptUserString, std::vector<std::string>& allPassengersGovID);
+
+std::tuple<std::vector<std::string>, std::vector<std::string>> getBookingInfo(pqxx::connection_base& c);
