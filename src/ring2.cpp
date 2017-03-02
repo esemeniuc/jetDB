@@ -474,5 +474,5 @@ std::tuple<std::vector<std::string>, std::vector<std::string>> getBookingInfo(pq
 
 	getGovIDs(txn, "Please enter your GovID", allPassengersGovID);
 
-	return std::tie(allPassengersGovID, flightIDList);
+	return {std::move(allPassengersGovID), std::move(flightIDList)	};
 }
