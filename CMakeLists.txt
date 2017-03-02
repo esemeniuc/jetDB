@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD "14" CACHE INTERNAL "Enable C++14")
 
 find_library(pqxx_LIBRARIES pqxx)
 find_path(pqxx_INCLUDES pqxx/pqxx)
+find_package(PkgConfig)
+
+pkg_check_modules(GTKMM gtkmm-3.0)
 
 include_directories(
   deps/range-v3/include
