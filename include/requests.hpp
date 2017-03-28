@@ -28,6 +28,29 @@ namespace jetdb{
       };
     }
   }
+
+  // available flights request
+  struct available_flights {
+    std::string airline;
+    std::string airport;
+    bool operator==(available_flights const& other) const{
+      return std::tie(airline, airport) == std::tie(other.airline, other.airport);
+    }
+    void to_json(nlohmann::json& j, const available_flights& v) {
+      j = nlohmann::json{
+        {"operation", "available_flights"},
+        {"airline", v.airline},
+        {"airport", v.airport}
+      };
+    }
+    void from_json(const nlohmann::json& j, available_flights& v) {
+      v = available_flights{
+        j["airline"].get<std::string>(),
+        j["airport"].get<std::string>()
+      };
+    }
+  }
+
   namespace responses{
     struct result{
       bool success;
