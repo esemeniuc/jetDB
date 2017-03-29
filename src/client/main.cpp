@@ -1,6 +1,8 @@
 #include <zmqpp/zmqpp.hpp>
 #include <iostream>
 #include <json.hpp>
+#include <algorithm>
+
 using json = nlohmann::json;
 
 std::string print_table(json data) {
@@ -10,10 +12,22 @@ std::string print_table(json data) {
   std::stringstream tt;
   auto columns = data["columns"].get<std::vector<std::string>>();
   int m = columns.size();
+
+  std::vector<unsigned int> widths(m);
   for (int i = 0; i < m; i++)
   {
-    ss << std::setw(20) << columns[i];
-    for (int j = 0; j < 20; j++)
+    widths[i] = std::max((unsigned int) 20, (unsigned int) columns[i].length());
+    for (auto row : data["rows"]) {
+      std::string st = row[columns[i]];
+      widths[i] = std::max(widths[i], (unsigned int) st.length());
+    }
+  }
+
+  for (int i = 0; i < m; i++)
+  {
+    int w = widths[i];
+    ss << std::setw(w) << columns[i];
+    for (int j = 0; j < w; j++)
       tt << "-";
 
     if (i + 1 < m) {
@@ -27,7 +41,7 @@ std::string print_table(json data) {
   for (auto row : data["rows"]) {
     for (int i = 0; i < m; i++) {
       std::string st = row[columns[i]];
-      ss << std::setw(20) << st;
+      ss << std::setw(widths[i]) << st;
       if (i + 1 < m) ss << " | ";
     }
     ss << std::endl;

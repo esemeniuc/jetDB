@@ -52,6 +52,56 @@ namespace jetdb{
         j.find("airportcode") != j.end() ? j["airportcode"].get<std::string>() : ""
       };
     }
+
+
+    // get airports
+    struct get_airports {
+      std::string airportcode;
+      std::string apname;
+      bool operator==(get_airports const& other) const {
+        return std::tie(airportcode, apname) == std::tie(other.airportcode, other.apname);
+      }
+    };
+
+    void to_json(nlohmann::json& j, const get_airports& v) {
+      j = nlohmann::json{
+        {"operation", "get_airports"},
+        {"airportcode", v.airportcode},
+        {"apname", v.apname}
+      };
+    }
+
+    void from_json(const nlohmann::json& j, get_airports& v) {
+      v = get_airports{
+        j.find("airportcode") != j.end() ? j["airportcode"].get<std::string>() : "",
+        j.find("apname") != j.end() ? j["apname"].get<std::string>() : ""
+      };
+    }
+
+    // get airlines
+    struct get_airlines {
+      std::string prefix;
+      std::string alname;
+      bool operator==(get_airlines const& other) const {
+        return std::tie(prefix, alname) == std::tie(other.prefix, other.alname);
+      }
+    };
+
+    void to_json(nlohmann::json& j, const get_airlines& v) {
+      j = nlohmann::json{
+        {"operation", "get_airlines"},
+        {"prefix", v.prefix},
+        {"alname", v.alname}
+      };
+    }
+
+    void from_json(const nlohmann::json& j, get_airlines& v) {
+      v = get_airlines{
+        j.find("prefix") != j.end() ? j["prefix"].get<std::string>() : "",
+        j.find("alname") != j.end() ? j["alname"].get<std::string>() : ""
+      };
+    }
+
   }
 
   namespace responses{

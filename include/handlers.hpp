@@ -8,6 +8,8 @@
 // add handlers here
 #include <handlers/login.hpp>
 #include <handlers/available_flights.hpp>
+#include <handlers/get_airports.hpp>
+#include <handlers/get_airlines.hpp>
 
 namespace jetdb{
   namespace handlers{
@@ -20,7 +22,9 @@ namespace jetdb{
 
     std::map<std::string, nlohmann::json(*)(pqxx::work&, nlohmann::json)> const _request_handlers{
       {"login", request_handler<requests::login>()},
-      {"available_flights", request_handler<requests::available_flights>()}
+      {"available_flights", request_handler<requests::available_flights>()},
+      {"get_airports", request_handler<requests::get_airports>()},
+      {"get_airlines", request_handler<requests::get_airlines>()}
     };
 
     nlohmann::json handle_request(pqxx::work& txn, nlohmann::json req){
