@@ -2,6 +2,7 @@
 
 #include <string>
 #include <tuple>
+#include <pqxx/pqxx>
 #include <json.hpp>
 
 namespace jetdb{
@@ -27,26 +28,28 @@ namespace jetdb{
         j["password"].get<std::string>()
       };
     }
-  }
 
-  // available flights request
-  struct available_flights {
-    std::string airline;
-    std::string airport;
-    bool operator==(available_flights const& other) const{
-      return std::tie(airline, airport) == std::tie(other.airline, other.airport);
-    }
+    // available flights request
+    struct available_flights {
+      std::string prefix;
+      std::string airportcode;
+      bool operator==(available_flights const& other) const{
+        return std::tie(prefix, airportcode) == std::tie(other.prefix, other.airportcode);
+      }
+    };
+
     void to_json(nlohmann::json& j, const available_flights& v) {
       j = nlohmann::json{
         {"operation", "available_flights"},
-        {"airline", v.airline},
-        {"airport", v.airport}
+        {"prefix", v.prefix},
+        {"airportcode", v.airportcode}
       };
     }
+
     void from_json(const nlohmann::json& j, available_flights& v) {
       v = available_flights{
-        j["airline"].get<std::string>(),
-        j["airport"].get<std::string>()
+        j.find("prefix") != j.end() ? j["prefix"].get<std::string>() : "",
+        j.find("airportcode") != j.end() ? j["airportcode"].get<std::string>() : ""
       };
     }
   }
@@ -84,6 +87,21 @@ namespace jetdb{
         j["success"].get<bool>(),
         j["reason"].get<std::string>()
       };
+    }
+
+    void json_results(nlohmann::json& j, pqxx::result& result) {
+      int m = result.columns();
+      std::vector<std::string> columns(m);
+      for(pqxx::tuple_size_type i = 0; i < m; i++)
+        columns[i] = result.column_name(i);
+
+      for (auto row : result) {
+        nlohmann::json item = nlohmann::json::object();
+        for (pqxx::tuple_size_type i = 0; i < m; i++) {
+          item[columns[i]] = row[i].c_str();
+        }
+        j.push_back(item);
+      }
     }
   }
 }
