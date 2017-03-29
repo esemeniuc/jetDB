@@ -17,6 +17,7 @@ namespace jetdb{
       );
       result = txn.prepared("available_flights")(prefix)(airportcode).exec();
 
+#if 0
       std::stringstream ss;
       int n = result.size();
       int m = result.columns();
@@ -44,8 +45,11 @@ namespace jetdb{
         }
         ss << std::endl;
       }
+#endif
 
-      return {true, ss.str()};
+      nlohmann::json jres;
+      responses::json_results(jres, result);
+      return {true, "", jres};
     }
   }
 }

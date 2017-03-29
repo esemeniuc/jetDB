@@ -58,15 +58,18 @@ namespace jetdb{
     struct result{
       bool success;
       std::string reason;
+      nlohmann::json data;
 
       result() = default;
-      result(bool s, std::string reason=""):
+      result(bool s, std::string reason="", nlohmann::json data={}):
         success{s},
-        reason{std::move(reason)}
+        reason{std::move(reason)},
+        data{std::move(data)}
       {}
       result(std::exception const& e):
         success{false},
-        reason{e.what()}
+        reason{e.what()},
+        data{}
       {}
       bool operator==(result const& other) const{
         return std::tie(success, reason) == std::tie(other.success, other.reason);
@@ -79,29 +82,37 @@ namespace jetdb{
     void to_json(nlohmann::json& j, const result& v) {
       j = nlohmann::json{
         {"success", v.success},
-        {"reason", v.reason}
+        {"reason", v.reason},
+        {"data", v.data}
       };
     }
     void from_json(const nlohmann::json& j, result& v) {
       v = result{
         j["success"].get<bool>(),
-        j["reason"].get<std::string>()
+        j["reason"].get<std::string>(),
+        j["data"]
       };
     }
 
     void json_results(nlohmann::json& j, pqxx::result& result) {
       int m = result.columns();
       std::vector<std::string> columns(m);
+
+      nlohmann::json items = nlohmann::json::array();
       for(pqxx::tuple_size_type i = 0; i < m; i++)
         columns[i] = result.column_name(i);
+
+      j["columns"] = columns;
 
       for (auto row : result) {
         nlohmann::json item = nlohmann::json::object();
         for (pqxx::tuple_size_type i = 0; i < m; i++) {
           item[columns[i]] = row[i].c_str();
         }
-        j.push_back(item);
+        items.push_back(item);
       }
+
+      j["rows"] = items;
     }
   }
 }
