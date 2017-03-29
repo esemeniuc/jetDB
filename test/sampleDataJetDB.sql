@@ -58,3 +58,14 @@ INSERT INTO Booked (bID,fID) VALUES ('1','2');
 INSERT INTO Booked (bID,fID) VALUES ('2','5');
 INSERT INTO Booked (bID,fID) VALUES ('3','4');
 INSERT INTO Booked (bID,fID) VALUES ('3','3');
+
+INSERT INTO Role (RingLevel, RingDesc) VALUES ('0','root');
+INSERT INTO Role (RingLevel, RingDesc) VALUES ('1','airline/airport employee');
+INSERT INTO Role (RingLevel, RingDesc) VALUES ('2','travel agent');
+INSERT INTO Role (RingLevel, RingDesc) VALUES ('3','public/end user');
+
+INSERT INTO LoginUser (Email, Password, RingLevel) VALUES ('test@test.com','admin', 0);
+INSERT INTO LoginUser (Email, Password, RingLevel) VALUES ('bob@airline.com','password1', 1);
+INSERT INTO LoginUser (Email, Password, RingLevel) VALUES ('tom@airport.com','password2', 1);
+INSERT INTO LoginUser (Email, Password, RingLevel) VALUES ('fred@agent.com','password3', 2);
+INSERT INTO LoginUser (Email, Password, RingLevel) VALUES ('user@user.com','password4', 3);

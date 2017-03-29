@@ -18,6 +18,17 @@ ring2Window::ring2Window()
 //	button1.set_property("height-request", 40);
 	add(button1);
 
-	button1.signal_clicked().connect([] {std::cout << "clicked that button\n";});
+	button1.signal_clicked().connect([]() {std::cout << "clicked that button\n";});
+	struct tmp{
+		Gtk::Button const& s;
+		tmp(Gtk::Button& b): s{b}{}
+		void operator()(){
+			//...
+		}
+	};
+	/*button1.signal_clicked().connect([&s=button1]() {
+		//...
+	});*/
+	button1.signal_clicked().connect(tmp{button1});
 	show_all_children();
 }
