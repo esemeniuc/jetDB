@@ -66,3 +66,19 @@ CREATE TABLE Booked (
   fID SERIAL REFERENCES Flight (fID),
   PRIMARY KEY (bID, fID)
 );
+
+-- assuming the following ring levels:
+-- 0: root
+-- 1: airline/airport employee
+-- 2: travel agent
+-- 3: public/end user
+CREATE TABLE Role (
+  RingLevel INT PRIMARY KEY,
+  RingDesc  VARCHAR(100)
+);
+
+  CREATE TABLE LoginUser (
+  Email VARCHAR(100) PRIMARY KEY,
+  Password VARCHAR(100),
+  RingLevel INT REFERENCES Role(RingLevel)
+);
