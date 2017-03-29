@@ -3,6 +3,6 @@ with import <nixpkgs> {};
     name = "jetdb";
     buildInputs = [
       libpqxx cmake postgresql python35Packages.docker_compose
-      python35Packages.ipython python35 libsodium zeromq
+      python35 libsodium zeromq python35Packages.pyzmq
     ];
   }

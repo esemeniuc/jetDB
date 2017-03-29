@@ -2,6 +2,7 @@ from prompt_toolkit import prompt
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.validation import Validator, ValidationError
 from lrparsing import Grammar, Token, TokenRegistry, THIS, repr_parse_tree, Prio, repr_grammar, ParseError, TokenError
+import zmq
 
 
 class CommandGrammar(Grammar):
@@ -39,8 +40,34 @@ def handle_parse_error(iterator, input_tuple, stack):
                 input_tuple,
             ]
 
+COMMANDS = {
+    'login': {
+        'name': None,
+        'password': None,
+    },
+    'quit': {},
+}
+
+def map_ast(ast, fn):
+    def map_start(ast):
+        return fn((CommandGrammar.START, map_command(ast[1])))
+    def map_command(ast):
+        return fn((CommandGrammar.command, map_name(ast[1]), map_params(ast[2])))
+    def map_name(ast):
+        return fn(ast)
+    def map_equals(ast):
+        return fn(ast)
+    def map_param(ast):
+        return fn((CommandGrammar.param, map_name(ast[1]), map_equals(ast[2]), map_name(ast[3])))
+    def map_params(ast):
+        if len(ast) == 1:
+            return fn(ast)
+        else:
+            return fn((CommandGrammar.params, map_param(ast[1]), map_params(ast[2])))
+    return map_start(ast)
+
 class CommandCompleter(Completer):
-    def find_completions(self, pt, cursor_pos, tp=None):
+    def _find_completions(self, pt, cursor_pos, tp=None):
         if pt[0] is CommandGrammar.START:
             return self.find_completions(pt[1], cursor_pos)
         elif pt[0] is CommandGrammar.command:
@@ -64,17 +91,54 @@ class CommandCompleter(Completer):
             return None
 
     def get_completions(self, document, complete_event):
-        categories = {
-            'command': ['aaaac', 'bbbbc', 'ccc'],
-            'param': ['aaaap', 'bbbbp', 'ccp'],
-            'value': ['aaaav', 'bbbbv', 'ccv'],
-        }
         cursor_pos = document.cursor_position
-        pt = CommandGrammar.parse(document.text, on_error=handle_parse_error)
-        t = self.find_completions(pt, cursor_pos)
-        if t is not None:
-            word, tp, pos = t
-            return [Completion(w, start_position=pos-cursor_pos) for w in categories[tp] if w.startswith(word)]
+        def find_completions(args):
+            if args[0] is CommandGrammar.T.name:
+                _, word, pos, _, _ = args
+                if cursor_pos > pos and cursor_pos <= pos+len(word):
+                    return True, word, pos
+                else:
+                    return False, word, pos
+            elif args[0] is CommandGrammar.param:
+                _, (is_name, name, name_pos), _, (is_value, value, value_pos) = args
+                if is_name:
+                    return 'param', name, name_pos
+                elif is_value:
+                    return 'value', value, value_pos, name
+                else:
+                    return None
+            elif args[0] is CommandGrammar.command:
+                _, (is_command, command, command_pos), other = args
+                if is_command:
+                    return 'command', command, command_pos
+                elif other is not None:
+                    return (*other, command)
+                else:
+                    return None
+            elif args[0] is CommandGrammar.params:
+                if len(args) != 1:
+                    return args[1] or args[2]
+                else:
+                    return None
+            else:
+                return args[1]
+        part = map_ast(CommandGrammar.parse(document.text, on_error=handle_parse_error), find_completions)
+        if part is not None:
+            tp, word, pos = part[:3]
+            if tp == 'command':
+                completions = COMMANDS.keys()
+            elif tp == 'param':
+                command = part[3]
+                completions = COMMANDS.get(command, {}).keys()
+            elif tp == 'value':
+                command = part[4]
+                param = part[3]
+                completer = COMMANDS.get(command, {}).get(param)
+                if completer is not None:
+                    completions = completer(value)
+                else:
+                    completions = []
+            return [Completion(w, start_position=pos-cursor_pos) for w in completions if w.startswith(word)]
         else:
             return []
 
@@ -96,8 +160,35 @@ class CommandValidator(Validator):
         except TokenError as e:
             raise ValidationError(message=str(e), cursor_position=e.offset) from e
 
+def command_tree_factory(*args):
+    args = args[0]
+    if args[0] is CommandGrammar.T.name:
+        return args[1]
+    elif args[0] is CommandGrammar.T.equals:
+        return args[1]
+    elif args[0] is CommandGrammar.param:
+        return {args[1]: args[3]}
+    elif args[0] is CommandGrammar.params:
+        if len(args) == 1:
+            return {}
+        else:
+            args[1].update(args[2])
+            return args[1]
+    elif args[0] is CommandGrammar.command:
+        return {'operation': args[1], **args[2]}
+    elif args[0] is CommandGrammar.START:
+        return args[1]
+    return None
 
 def client():
-    text = prompt('Give me some input: ', completer=CommandCompleter(), validator=CommandValidator())
-    pt = CommandGrammar.parse(text)
-    print('You said:', repr_parse_tree(pt))
+    ctx = zmq.Context()
+    sock = ctx.socket(zmq.REQ)
+    sock.connect('tcp://localhost:5555')
+    while True:
+        text = prompt('> ', completer=CommandCompleter(), validator=CommandValidator())
+        op = CommandGrammar.parse(text, tree_factory=command_tree_factory)
+        if op['operation'] == 'quit':
+            break
+        sock.send_json(op)
+        response = sock.recv_json()
+        print(response)
