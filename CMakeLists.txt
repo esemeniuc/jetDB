@@ -9,11 +9,16 @@ find_path(pqxx_INCLUDES pqxx/pqxx)
 
 include_directories(
   deps/range-v3/include
+  deps/zmqpp/src
   deps/catch
+  deps/nlohmann_json
   include
   ${pqxx_INCLUDES}
 )
 
+add_subdirectory(deps/zmqpp)
+
 enable_testing()
 
 add_subdirectory(src)
+add_subdirectory(test)
