@@ -45,3 +45,6 @@ CTestTestfile.cmake
 # other
 build
 .idea/
+__pycache__/
+venv/
+*.egg-info/

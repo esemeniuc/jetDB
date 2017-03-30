@@ -17,15 +17,31 @@ https://docs.google.com/document/d/1IT8hl958xbVz-hwyeYwBMfjBdKyzSMkYBtFo6epQsLk
 ##Usage instructions
 
 Things you need:
+- python3
 - docker
 - docker-compose
 - a working postgres installation (we could use the docker one, but this proves you can access postgres from the local machine)
 
-To get a working psql shell with all the data loaded, go into the test folder and run:
+###Server Launch
+To get a working psql shell with all the data loaded
+- set up docker (add yourself to docker group)
+- go into the test folder and run:
 ```
-./playground.sh
+./playground.sh ../build/src/server
 ```
 Examine the contents for how/why that works.
+
+###Client Launch:
+- Set up python (for client)
+```
+python3 -m venv venv #make a virtual environment
+source venv/bin/activate #use new virtual environment
+python setup.py develop
+```
+- Go to src/client
+```
+jetdb
+```
 
 ##Build instructions
 
@@ -37,8 +53,16 @@ make
 
 Also, make sure your git submodules are set up:
 ```
+git submodule init
 git submodule update
+```
+
+##Testing
+From the build folder run
+```
+make && ctest --output-on-failure
 ```
 
 Build dependencies:
 - libpqxx
+- zeroMQ
