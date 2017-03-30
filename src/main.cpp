@@ -7,7 +7,7 @@
 
 int main(int argc, char** argv)
 {
-	pqxx::connection c("dbname=postgres user=postgres password= hostname=localhost");
+	pqxx::connection c("dbname=jetdb user=postgres password= hostname=localhost");
 	std::string loopStatus;
 
 	//book stuff

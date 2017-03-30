@@ -1,35 +1,28 @@
+//
+// Created by eric on 2/21/17.
+//
 #include <iostream>
 #include <pqxx/pqxx>
+#include "ring2.h"
 
-int main(int argc, char** argv){
-  pqxx::connection c("dbname=postgres user=postgres password= hostname=localhost");
-  pqxx::work txn(c);
+int main(int argc, char** argv)
+{
+	pqxx::connection c("dbname=jetdb user=postgres password= hostname=localhost");
+	std::string loopStatus;
 
-  pqxx::result r = txn.exec(
-    "SELECT pid, Model "
-    "FROM Plane "
-    "WHERE Model =" + txn.quote(argv[1]));
+	//book stuff
 
-  if (r.size() != 1)
-  {
-    std::cerr
-      << "Expected 1 plane with name " << argv[1] << ", "
-      << "but found " << r.size() << std::endl;
-    return 1;
-  }
-
-	std::cout << "Found " << r.size() << "   planes:" << std::endl;
-	for (auto row: r)
+	do
 	{
-		std::cout << row[0].c_str() << row[1].c_str() << std::endl;
-	}
-//  int employee_id = r[0][0].as<int>();
-//  std::cout << "Updating employee #" << employee_id << std::endl;
-//
-//  txn.exec(
-//    "UPDATE EMPLOYEE "
-//    "SET salary = salary + 1 "
-//    "WHERE id = " + txn.quote(employee_id));
-//
-//  txn.commit();
+		printf("Booking a flight (enter 'n' to quit)\n");
+		printf("Enter '?' to lookup acceptable input\n");
+		std::tuple<std::vector<std::string>, std::vector<std::string>> userInfo = getBookingInfo(c);
+
+		int bookingStatus = bookFlightByID(c, userInfo);
+
+		printf("booking status: %d\n", bookingStatus);
+
+		printf("Thank you\n\nBook another flight?\n");
+		std::getline(std::cin, loopStatus);
+	} while(loopStatus != "n");
 }
