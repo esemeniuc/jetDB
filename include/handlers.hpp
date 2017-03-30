@@ -7,6 +7,7 @@
 
 // add handlers here
 #include <handlers/login.hpp>
+#include <handlers/login2.hpp>
 
 namespace jetdb{
   namespace handlers{
@@ -18,7 +19,8 @@ namespace jetdb{
     }
 
     std::map<std::string, nlohmann::json(*)(pqxx::work&, nlohmann::json)> const _request_handlers{
-      {"login", request_handler<requests::login>()}
+      {"login", request_handler<requests::login>()},
+      {"login2", request_handler<requests::login2>()}
     };
 
     nlohmann::json handle_request(pqxx::work& txn, nlohmann::json req){

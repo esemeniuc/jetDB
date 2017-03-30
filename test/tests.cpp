@@ -30,3 +30,22 @@ TEST_CASE("login"){
       jetdb::requests::login{"jenny", "password"})
      == jetdb::responses::result(true));
 }
+
+TEST_CASE("login2 testing"){
+pqxx::work tx{connection};
+REQUIRE(
+        jetdb::handlers::handle_request(
+        tx,
+        jetdb::requests::login2{"test@test.com", "password"})
+        == jetdb::responses::result(true, "super secret"));
+REQUIRE(
+        jetdb::handlers::handle_request(
+        tx,
+        jetdb::requests::login2{"badtest@test.com", "password"})
+        == jetdb::responses::result(false, "not secret"));
+REQUIRE(
+        jetdb::handlers::handle_request(
+        tx,
+        jetdb::requests::login2{"test@test.com", "badpassword"})
+        == jetdb::responses::result(false, "not secret"));
+}

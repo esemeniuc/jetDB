@@ -27,6 +27,29 @@ namespace jetdb{
         j["password"].get<std::string>()
       };
     }
+	  
+	  //cwaffles testing stuff
+	  struct login2{
+		  std::string email;
+		  std::string password;
+		  bool operator==(login2 const& other) const{
+			  return std::tie(email, password) == std::tie(other.email, other.password);
+		  }
+	  };
+	  void to_json(nlohmann::json& j, const login2& v) {
+		  j = nlohmann::json{
+				  {"operation", "login2"},
+				  {"email", v.email},
+				  {"password", v.password}
+		  };
+	  }
+	  void from_json(const nlohmann::json& j, login2& v) {
+		  v = login2{
+				  j["email"].get<std::string>(),
+				  j["password"].get<std::string>()
+		  };
+	  }
+
   }
   namespace responses{
     struct result{

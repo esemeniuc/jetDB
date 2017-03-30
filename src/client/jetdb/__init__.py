@@ -7,7 +7,7 @@ import zmq
 
 class CommandGrammar(Grammar):
     class T(TokenRegistry):
-        name = Token(re=r'\w+')
+        name = Token(re=r'[\w\.@]+')
         equals = Token('=')
     param = T.name + T.equals + T.name
     params = param + THIS | THIS*0
@@ -43,6 +43,10 @@ def handle_parse_error(iterator, input_tuple, stack):
 COMMANDS = {
     'login': {
         'name': None,
+        'password': None,
+    },
+    'login2': {
+        'email': None,
         'password': None,
     },
     'quit': {},
@@ -122,7 +126,10 @@ class CommandCompleter(Completer):
                     return None
             else:
                 return args[1]
-        part = map_ast(CommandGrammar.parse(document.text, on_error=handle_parse_error), find_completions)
+        try:
+            part = map_ast(CommandGrammar.parse(document.text, on_error=handle_parse_error), find_completions)
+        except Exception:
+            return []
         if part is not None:
             tp, word, pos = part[:3]
             if tp == 'command':
