@@ -2,6 +2,7 @@ version: '2'
 services:
   postgres:
     build: .
-    network_mode: "host"
     environment:
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_PASSWORD=
+    ports:
+      - "9001:5432"
