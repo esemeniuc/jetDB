@@ -21,7 +21,7 @@ int main(int argc, char** argv){
 	std::cout << "Found " << r.size() << "   planes:" << std::endl;
 	for (auto row: r)
 	{
-		std::cout << row[1].c_str() << std::endl;
+		std::cout << row[0].c_str() << row[1].c_str() << std::endl;
 	}
 //  int employee_id = r[0][0].as<int>();
 //  std::cout << "Updating employee #" << employee_id << std::endl;

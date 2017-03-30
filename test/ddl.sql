@@ -8,13 +8,13 @@ CREATE TABLE Airport (
 
 CREATE TABLE Airline (
   Prefix CHAR(3) PRIMARY KEY,
-  AlName CHAR(50)
+  AlName VARCHAR(50)
 );
 
 CREATE TABLE Plane (
   pID      SERIAL PRIMARY KEY,
   Prefix   CHAR(3) REFERENCES Airline (Prefix),
-  Model    CHAR(50),
+  Model    VARCHAR(50),
   Capacity SMALLINT,
   MaxRange SMALLINT
 );
@@ -26,7 +26,8 @@ CREATE TABLE Flight (
   FromAirportCode CHAR(3) REFERENCES Airport (AirportCode),
   ToAirportCode   CHAR(3) REFERENCES Airport (AirportCode),
   StartTime       TIMESTAMP,
-  EndTime         TIMESTAMP
+  EndTime         TIMESTAMP,
+  Cost            SMALLINT
 );
 
 CREATE TABLE FlightName (
@@ -64,4 +65,20 @@ CREATE TABLE Booked (
   bID SERIAL REFERENCES Booking (bID) NOT NULL,
   fID SERIAL REFERENCES Flight (fID),
   PRIMARY KEY (bID, fID)
+);
+
+-- assuming the following ring levels:
+-- 0: root
+-- 1: airline/airport employee
+-- 2: travel agent
+-- 3: public/end user
+CREATE TABLE Role (
+  RingLevel INT PRIMARY KEY,
+  RingDesc  VARCHAR(100)
+);
+
+  CREATE TABLE LoginUser (
+  Email VARCHAR(100) PRIMARY KEY,
+  Password VARCHAR(100),
+  RingLevel INT REFERENCES Role(RingLevel)
 );
