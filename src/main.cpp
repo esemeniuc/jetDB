@@ -4,10 +4,11 @@
 #include <iostream>
 #include <pqxx/pqxx>
 #include "ring2.h"
+#include "../include/dbConnectionParams.hpp"
 
 int main(int argc, char** argv)
 {
-	pqxx::connection c("dbname=postgres user=postgres password= hostname=localhost");
+	pqxx::connection c(DB_CONNECTION_STRING);
 	std::string loopStatus;
 
 	//book stuff
