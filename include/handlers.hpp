@@ -13,6 +13,7 @@
 #include <handlers/available_flights.hpp>
 #include <handlers/get_airports.hpp>
 #include <handlers/get_airlines.hpp>
+#include <handlers/avg_costs.hpp>
 
 namespace jetdb{
   namespace handlers{
@@ -29,7 +30,8 @@ namespace jetdb{
       {"available_flights", request_handler<requests::available_flights>()},
       {"get_airports", request_handler<requests::get_airports>()},
       {"get_airlines", request_handler<requests::get_airlines>()},
-      {"bookFlight", request_handler<requests::bookFlight>()}
+      {"bookFlight", request_handler<requests::bookFlight>()},
+      {"avg_costs", request_handler<requests::avg_costs>()}
     };
 
     nlohmann::json handle_request(pqxx::work& txn, nlohmann::json req){

@@ -145,6 +145,27 @@ namespace jetdb{
 		  };
 	  }
 
+    // average costs
+    struct avg_costs {
+      std::string kind;
+      bool operator==(avg_costs const& other) const {
+        return std::tie(kind) == std::tie(other.kind);
+      }
+    };
+
+    void to_json(nlohmann::json& j, const avg_costs& v) {
+      j = nlohmann::json{
+        {"operation", "avg_costs"},
+        {"kind", v.kind}
+      };
+    }
+
+    void from_json(const nlohmann::json& j, avg_costs& v) {
+      v = avg_costs{
+        j.find("kind") != j.end() ? j["kind"].get<std::string>() : ""
+      };
+    }
+
   }
 
   namespace responses{
