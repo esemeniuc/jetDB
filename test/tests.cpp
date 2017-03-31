@@ -106,6 +106,12 @@ TEST_CASE("book flight")
 TEST_CASE("find passengers who flew with every airline (frequent fliers)"){
 	pqxx::work tx{connection};
 	//use data from sampleDataJetDB.sql
+
+	//try before adding data
+	jetdb::responses::result response = jetdb::handlers::handle_request(tx, jetdb::requests::flewEveryAirline{});
+	jetdb::responses::result expectedResult{true, "", nlohmann::json::parse("{\"columns\":[\"govid\"],\"rows\":[]}")}; //TODO fix output format
+	REQUIRE(response == expectedResult);
+
 	jetdb::responses::result insertRequest = jetdb::handlers::handle_request(tx, jetdb::requests::bookFlight{
 			//clientGovID
 			"22223333",
@@ -122,10 +128,10 @@ TEST_CASE("find passengers who flew with every airline (frequent fliers)"){
 					"7"
 			}});
 
-	jetdb::responses::result response = jetdb::handlers::handle_request(tx, jetdb::requests::flewEveryAirline{});
-
-	jetdb::responses::result expectedResult{true, "", nlohmann::json::parse("{\"columns\":[\"govid\"],\"rows\":[{\"govid\":\"22223333\"}, {\"govid\":\"33334444\"}]}")}; //TODO fix output format
-	// update json_results format
+	//try after adding data
+	response = jetdb::handlers::handle_request(tx, jetdb::requests::flewEveryAirline{});
+	expectedResult = {true, "", nlohmann::json::parse("{\"columns\":[\"govid\"],\"rows\":[{\"govid\":\"22223333\"}, "
+															"{\"govid\":\"33334444\"}]}")}; //TODO fix output format
 
 	REQUIRE(response == expectedResult);
 }
