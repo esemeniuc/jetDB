@@ -43,8 +43,6 @@ FROM flight
   NATURAL JOIN airline
 WHERE flight.fid = '1';
 
-
-
 --get airports
 -- SELECT * FROM airport
 
@@ -63,3 +61,17 @@ FROM
 WHERE fromairportcode = 'JFK' AND toairportcode = 'YVR' AND starttime >= '2016-10-15 23:39:37.000000' AND
       endtime <= '2016-10-16 23:39:37.000000'
 */
+
+-- getAllFlights
+SELECT
+  fid,
+  CONCAT(flight.prefix, flightname.flightnum) AS flightname,
+  airline.alname,
+  flight.fromairportcode,
+  flight.toairportcode,
+  flight.starttime,
+  flight.endtime
+FROM flight
+  NATURAL JOIN named
+  NATURAL JOIN flightname
+  NATURAL JOIN airline

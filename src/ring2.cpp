@@ -10,7 +10,8 @@
 //preconditions: GovIDs and flight IDs in the db
 //description: use to book a flight after acquiring all valid user info from interactive prompt or GUI
 //postconditions: returns 0 on successful booking, nonzero otherwise
-int bookFlightByID(pqxx::connection_base& c, std::tuple<std::vector<std::string>, std::vector<std::string>> userInfo)
+int bookFlightByIDTuple(pqxx::connection_base& c, std::tuple<std::vector<std::string>, std::vector<std::string>>
+userInfo)
 {
 	pqxx::work txn(c);
 	std::string bid;
@@ -57,6 +58,64 @@ int bookFlightByID(pqxx::connection_base& c, std::tuple<std::vector<std::string>
 	for(unsigned long i = 0; i < allPassengerGovIDs.size(); i++)
 	{
 		result = txn.prepared("booksInsert")(allPassengerGovIDs[i])(bid)(unixTime)(flightTotalCost).exec();
+	}
+
+//	insert into booked table
+	c.prepare(
+			"bookedInsert",
+			"INSERT INTO booked (bid, fid) VALUES ($1, $2);");
+	for(unsigned long i = 0; i < flightIDList.size(); i++)
+	{
+		result = txn.prepared("bookedInsert")(bid)(flightIDList[i]).exec();
+	}
+
+	txn.commit();
+	return 0; //all good
+}
+
+int bookFlightByID(pqxx::connection_base& c, std::string clientGovID, std::vector<std::string> otherPassengerGovIDs,
+				   std::vector<std::string> flightIDList)
+{
+	pqxx::work txn(c);
+	std::string bid;
+	std::string flightTotalCost;
+	std::time_t unixTime = std::time(0);
+
+
+	if(clientGovID == "" || flightIDList.size() < 1)
+	{
+		return -1; //error
+	}
+
+	//get flight total cost
+	std::string flightCostQuery = "SELECT SUM(Cost) FROM Flight WHERE fid IN (";
+	std::string fidConcatString;
+	for(int i = 0; i < flightIDList.size()-1; i++)
+	{
+		fidConcatString += txn.quote(flightIDList[i]) + ", ";
+	}
+
+	flightCostQuery += fidConcatString +
+					  txn.quote(flightIDList[flightIDList.size()-1]) + ");";
+
+	pqxx::result result = txn.exec(flightCostQuery);
+	flightTotalCost = result[0][0].c_str();
+
+	//insert into booking table
+	std::string bookingInsert = "INSERT INTO booking (bid) VALUES (DEFAULT) RETURNING bid";
+	result = txn.exec(bookingInsert);
+	bid = result[0][0].c_str();
+
+	//insert into books table
+	c.prepare(
+			"booksInsert",
+			"INSERT INTO books (govid, bid, datebooked, cost) VALUES ($1, $2, to_timestamp($3), $4);");
+
+	result = txn.prepared("booksInsert")(clientGovID)(bid)(unixTime)(flightTotalCost).exec(); //handle client
+
+	for(unsigned long i = 0; i < otherPassengerGovIDs.size(); i++)
+	{
+		result = txn.prepared("booksInsert")(otherPassengerGovIDs[i])(bid)(unixTime)(flightTotalCost).exec();
 	}
 
 //	insert into booked table

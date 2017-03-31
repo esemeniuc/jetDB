@@ -6,24 +6,33 @@
 #include "ring2.h"
 #include "../include/dbConnectionParams.hpp"
 
+#include <json.hpp>
+
 int main(int argc, char** argv)
 {
 	pqxx::connection c(DB_CONNECTION_STRING);
 	std::string loopStatus;
 
-	//book stuff
 
-	do
-	{
-		printf("Booking a flight (enter 'n' to quit)\n");
-		printf("Enter '?' to lookup acceptable input\n");
-		std::tuple<std::vector<std::string>, std::vector<std::string>> userInfo = getBookingInfo(c);
+	std::vector<int> a = {1,2,3};
+	nlohmann::json combined = {{"first", "thing"}, {"second", a}};
 
-		int bookingStatus = bookFlightByID(c, userInfo);
+	nlohmann::json thing = nlohmann::json(a);
+	std::cout << thing.dump();
+	std::cout << combined.dump();
 
-		printf("booking status: %d\n", bookingStatus);
-
-		printf("Thank you\n\nBook another flight?\n");
-		std::getline(std::cin, loopStatus);
-	} while(loopStatus != "n");
+//book stuff
+//	do
+//	{
+//		printf("Booking a flight (enter 'n' to quit)\n");
+//		printf("Enter '?' to lookup acceptable input\n");
+//		std::tuple<std::vector<std::string>, std::vector<std::string>> userInfo = getBookingInfo(c);
+//
+//		int bookingStatus = bookFlightByIDTuple(c, userInfo);
+//
+//		printf("booking status: %d\n", bookingStatus);
+//
+//		printf("Thank you\n\nBook another flight?\n");
+//		std::getline(std::cin, loopStatus);
+//	} while(loopStatus != "n");
 }
