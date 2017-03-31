@@ -21,6 +21,10 @@ INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTi
 INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime,Cost) VALUES(DEFAULT,'5','DLH','CDG','LHR','2016-11-15 15:53:49','2016-11-15 19:53:49',200);
 INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime,Cost) VALUES(DEFAULT,'5','DLH','LHR','CDG','2015-07-20 0:11:03','2015-07-20 10:11:03',300);
 INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime,Cost) VALUES(DEFAULT,'4','JAL','JFK','NRT','2015-05-23 22:04:48','2015-05-24 12:04:48',1000);
+INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime,Cost) VALUES(DEFAULT,'4','UAE',
+'LHR','CDG','2015-03-24 22:04:48','2015-03-25 12:04:48',1000);
+INSERT INTO Flight (fID,pID,Prefix,FromAirportCode,ToAirportCode,StartTime,EndTime,Cost) VALUES(DEFAULT,'4','CSN',
+'CDG','YVR','2015-06-12 22:04:48','2015-06-12 12:04:48',1000);
 
 INSERT INTO FlightName (FlightNum,Prefix) VALUES ('111','DAL');
 INSERT INTO FlightName (FlightNum,Prefix) VALUES ('222','DLH');

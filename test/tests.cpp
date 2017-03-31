@@ -66,7 +66,8 @@ TEST_CASE("user authentication"){
 				jetdb::responses::result(false, "invalid username/password"));
 }
 
-TEST_CASE("book flight"){
+TEST_CASE("book flight")
+{
 	pqxx::work tx{connection};
 	//use data from sampleDataJetDB.sql
 	jetdb::responses::result goodRequest1 = jetdb::handlers::handle_request(tx, jetdb::requests::bookFlight{
@@ -100,6 +101,31 @@ TEST_CASE("book flight"){
 
 	REQUIRE(goodRequest1 == jetdb::handlers::bookFlight::successMsg);
 	REQUIRE(badRequest1 == jetdb::handlers::bookFlight::failureMsg);
+}
 
+TEST_CASE("find passengers who flew with every airline (frequent fliers)"){
+	pqxx::work tx{connection};
+	//use data from sampleDataJetDB.sql
+	jetdb::responses::result insertRequest = jetdb::handlers::handle_request(tx, jetdb::requests::bookFlight{
+			//clientGovID
+			"22223333",
+			{//otherPassengerGovIDs
+				"33334444"
+			},
+			{//flightIDList
+					"1",
+					"2",
+					"3",
+					"4",
+					"5",
+					"6",
+					"7"
+			}});
 
+	jetdb::responses::result response = jetdb::handlers::handle_request(tx, jetdb::requests::flewEveryAirline{});
+
+	jetdb::responses::result expectedResult{true, "", nlohmann::json::parse("{\"columns\":[\"govid\"],\"rows\":[{\"govid\":\"22223333\"}, {\"govid\":\"33334444\"}]}")}; //TODO fix output format
+	// update json_results format
+
+	REQUIRE(response == expectedResult);
 }
