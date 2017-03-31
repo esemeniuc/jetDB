@@ -4,7 +4,9 @@
 #include <vector>
 #include <pqxx/pqxx>
 
-int bookFlightByID(pqxx::connection_base& c, std::tuple<std::vector<std::string>, std::vector<std::string>> userInfo);
+int bookFlightByIDTuple(pqxx::connection_base& c, std::tuple<std::vector<std::string>, std::vector<std::string>> userInfo);
+int bookFlightByID(pqxx::connection_base& c, std::string clientGovID, std::vector<std::string> otherPassengerGovIDs,
+				   std::vector<std::string> flightIDList);
 
 int getFlight(pqxx::work& txn,
 			  std::string promptUserString,

@@ -77,8 +77,8 @@ CREATE TABLE Role (
   RingDesc  VARCHAR(100)
 );
 
-  CREATE TABLE LoginUser (
-  Email VARCHAR(100) PRIMARY KEY,
-  Password VARCHAR(100),
-  RingLevel INT REFERENCES Role(RingLevel)
+CREATE TABLE LoginUser (
+  Email     VARCHAR(100) PRIMARY KEY,
+  Password  VARCHAR(100),
+  RingLevel INT REFERENCES Role (RingLevel)
 );

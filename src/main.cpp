@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 		printf("Enter '?' to lookup acceptable input\n");
 		std::tuple<std::vector<std::string>, std::vector<std::string>> userInfo = getBookingInfo(c);
 
-		int bookingStatus = bookFlightByID(c, userInfo);
+		int bookingStatus = bookFlightByIDTuple(c, userInfo);
 
 		printf("booking status: %d\n", bookingStatus);
 
