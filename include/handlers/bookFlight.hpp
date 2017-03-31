@@ -65,7 +65,7 @@ namespace jetdb{
 					result = txn.prepared("bookedInsert")(bid)(flightIDList[i]).exec();
 				}
 
-				txn.commit();
+//				txn.commit();
 			} catch(const pqxx::pqxx_exception &e)
 			{
 				return -2; //some exception thrown

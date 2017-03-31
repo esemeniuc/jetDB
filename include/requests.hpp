@@ -145,6 +145,18 @@ namespace jetdb{
 		  };
 	  }
 
+
+	  struct flewEveryAirline{};
+	  void to_json(nlohmann::json& j, const flewEveryAirline& v) {
+		  j = nlohmann::json{
+				  {"operation", "flewEveryAirline"}
+		  };
+	  }
+	  void from_json(const nlohmann::json& j, flewEveryAirline& v) {
+		  v = flewEveryAirline{};
+	  }
+
+
     // average costs
     struct avg_costs {
       std::string kind;
@@ -186,13 +198,13 @@ namespace jetdb{
         data{}
       {}
       bool operator==(result const& other) const{
-        return std::tie(success, reason) == std::tie(other.success, other.reason);
+        return std::tie(success, reason, data) == std::tie(other.success, other.reason, other.data);
       }
     };
-    /*std::ostream& operator<<(std::ostream& out, success const& s){
-      out << "success{" << s.succeeded << ",\"" << s.reason << "\"}";
+    std::ostream& operator<<(std::ostream& out, result const& s){
+      out << static_cast<nlohmann::json>(s);
       return out;
-    }*/
+    }
     void to_json(nlohmann::json& j, const result& v) {
       j = nlohmann::json{
         {"success", v.success},
