@@ -145,7 +145,6 @@ namespace jetdb{
 		  };
 	  }
 
-
 	  struct flewEveryAirline{};
 	  void to_json(nlohmann::json& j, const flewEveryAirline& v) {
 		  j = nlohmann::json{
@@ -175,6 +174,30 @@ namespace jetdb{
     void from_json(const nlohmann::json& j, avg_costs& v) {
       v = avg_costs{
         j.find("kind") != j.end() ? j["kind"].get<std::string>() : ""
+      };
+    }
+
+    // find paths
+    struct find_paths {
+      std::string from_airportcode;
+      std::string to_airportcode;
+      bool operator==(find_paths const& other) const {
+        return std::tie(from_airportcode, to_airportcode) == std::tie(other.from_airportcode, other.to_airportcode);
+      }
+    };
+
+    void to_json(nlohmann::json& j, const find_paths& v) {
+      j = nlohmann::json{
+        {"operation", "find_paths"},
+        {"from_airportcode", v.from_airportcode},
+        {"to_airportcode", v.to_airportcode}
+      };
+    }
+
+    void from_json(const nlohmann::json& j, find_paths& v) {
+      v = find_paths{
+        j["from_airportcode"].get<std::string>(),
+        j["to_airportcode"].get<std::string>()
       };
     }
 
