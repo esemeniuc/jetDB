@@ -3,14 +3,12 @@
 #include <iostream>
 #include <handlers.hpp>
 #include <json.hpp>
-#include <prepared_statements.hpp>
 #include "../include/dbConnectionParams.hpp"
 
 int main(){
   zmqpp::context context;
   zmqpp::socket socket{context, zmqpp::socket_type::reply};
   pqxx::connection connection{DB_CONNECTION_STRING};
-  jetdb::prepare(connection);
   socket.bind("tcp://*:5555");
 
   zmqpp::message msg;

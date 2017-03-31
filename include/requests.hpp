@@ -28,28 +28,6 @@ namespace jetdb{
         j["password"].get<std::string>()
       };
     }
-	  
-	  //cwaffles testing stuff
-	  struct login2{
-		  std::string email;
-		  std::string password;
-		  bool operator==(login2 const& other) const{
-			  return std::tie(email, password) == std::tie(other.email, other.password);
-		  }
-	  };
-	  void to_json(nlohmann::json& j, const login2& v) {
-		  j = nlohmann::json{
-				  {"operation", "login2"},
-				  {"email", v.email},
-				  {"password", v.password}
-		  };
-	  }
-	  void from_json(const nlohmann::json& j, login2& v) {
-		  v = login2{
-				  j["email"].get<std::string>(),
-				  j["password"].get<std::string>()
-		  };
-	  }
 
     // available flights request
     struct available_flights {
@@ -123,6 +101,51 @@ namespace jetdb{
         j.find("alname") != j.end() ? j["alname"].get<std::string>() : ""
       };
     }
+
+
+	  //cwaffles testing stuff
+	  struct login2{
+		  std::string email;
+		  std::string password;
+		  bool operator==(login2 const& other) const{
+			  return std::tie(email, password) == std::tie(other.email, other.password);
+		  }
+	  };
+	  void to_json(nlohmann::json& j, const login2& v) {
+		  j = nlohmann::json{
+				  {"operation", "login2"},
+				  {"email", v.email},
+				  {"password", v.password}
+		  };
+	  }
+	  void from_json(const nlohmann::json& j, login2& v) {
+		  v = login2{
+				  j["email"].get<std::string>(),
+				  j["password"].get<std::string>()
+		  };
+	  }
+
+
+	  struct bookFlight{
+		  std::string clientGovID;
+		  std::vector<std::string> otherPassengerGovIDs;
+		  std::vector<std::string> flightIDList;
+	  };
+	  void to_json(nlohmann::json& j, const bookFlight& v) {
+		  j = nlohmann::json{
+				  {"operation", "bookFlight"},
+				  {"clientGovID", v.clientGovID},
+				  {"otherPassengerGovIDs", v.otherPassengerGovIDs},
+				  {"flightIDs", v.flightIDList}
+		  };
+	  }
+	  void from_json(const nlohmann::json& j, bookFlight& v) {
+		  v = bookFlight{
+				  j["clientGovID"].get<std::string>(),
+				  j["otherPassengerGovIDs"].get<std::vector<std::string>>(),
+				  j["flightIDs"].get<std::vector<std::string>>()
+		  };
+	  }
 
   }
 
