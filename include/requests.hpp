@@ -130,6 +130,10 @@ namespace jetdb{
 		  std::string clientGovID;
 		  std::vector<std::string> otherPassengerGovIDs;
 		  std::vector<std::string> flightIDList;
+		  bool operator==(bookFlight const& other) const{
+			  return std::tie(clientGovID, otherPassengerGovIDs, flightIDList) ==
+					  std::tie(other.clientGovID, other.otherPassengerGovIDs, other.flightIDList);
+		  }
 	  };
 	  void to_json(nlohmann::json& j, const bookFlight& v) {
 		  j = nlohmann::json{
@@ -155,6 +159,45 @@ namespace jetdb{
 	  }
 	  void from_json(const nlohmann::json& j, flewEveryAirline& v) {
 		  v = flewEveryAirline{};
+	  }
+
+	  //add flight
+	  struct addFlight{
+		  int pID;
+		  std::string prefix;
+		  std::string fromAirportCode;
+		  std::string toAirportCode;
+		  std::string startTime;
+		  std::string endTime;
+		  int cost;
+
+		  bool operator==(addFlight const& other) const{
+			  return std::tie(pID, prefix, fromAirportCode, toAirportCode, startTime, endTime, cost) ==
+					 std::tie(other.pID, other.prefix, other.fromAirportCode, other.toAirportCode, other.startTime, other.endTime, other.cost);
+		  }
+	  };
+	  void to_json(nlohmann::json& j, const addFlight& v) {
+		  j = nlohmann::json{
+				  {"operation", "addFlight"},
+				  {"pID", v.pID},
+				  {"prefix", v.prefix},
+				  {"fromAirportCode", v.fromAirportCode},
+				  {"toAirportCode", v.toAirportCode},
+				  {"startTime", v.startTime},
+				  {"endTime", v.endTime},
+				  {"cost", v.cost}
+		  };
+	  }
+	  void from_json(const nlohmann::json& j, addFlight& v) {
+		  v = addFlight{
+				  j["pID"].get<int>(),
+				  j["prefix"].get<std::string>(),
+				  j["fromAirportCode"].get<std::string>(),
+				  j["toAirportCode"].get<std::string>(),
+				  j["startTime"].get<std::string>(),
+				  j["endTime"].get<std::string>(),
+				  j["cost"].get<int>()
+		  };
 	  }
 
 

@@ -10,6 +10,7 @@
 #include <handlers/login2.hpp>
 #include <handlers/bookFlight.hpp>
 #include <handlers/flewEveryAirline.hpp>
+#include <handlers/addFlight.hpp>
 
 #include <handlers/available_flights.hpp>
 #include <handlers/get_airports.hpp>
@@ -30,6 +31,7 @@ namespace jetdb{
       {"login", request_handler<requests::login>()},
       {"login2", request_handler<requests::login2>()},
       {"bookFlight", request_handler<requests::bookFlight>()},
+      {"addFlight", request_handler<requests::addFlight>()},
       {"flewEveryAirline", request_handler<requests::flewEveryAirline>()},
       {"available_flights", request_handler<requests::available_flights>()},
       {"get_airports", request_handler<requests::get_airports>()},
