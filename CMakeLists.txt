@@ -8,13 +8,26 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 find_library(pqxx_LIBRARIES pqxx)
 find_path(pqxx_INCLUDES pqxx/pqxx)
 
+find_package(PkgConfig REQUIRED)
+find_package(OpenGL REQUIRED)
+
+pkg_check_modules(SDL2 REQUIRED sdl2)
+
 include_directories(
   deps/range-v3/include
   deps/zmqpp/src
   deps/catch
+  deps/imgui
   deps/nlohmann_json
   include
   ${pqxx_INCLUDES}
+  ${SDL2_INCLUDE_DIRS}
+)
+
+set(IMGUI_SRCS
+  ${CMAKE_SOURCE_DIR}/deps/imgui/imgui.cpp
+  ${CMAKE_SOURCE_DIR}/deps/imgui/imgui_draw.cpp
+  ${CMAKE_SOURCE_DIR}/deps/imgui/imgui_demo.cpp
 )
 
 add_subdirectory(deps/zmqpp)
