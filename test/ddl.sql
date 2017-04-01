@@ -80,5 +80,6 @@ CREATE TABLE Role (
 CREATE TABLE LoginUser (
   Email     VARCHAR(100) PRIMARY KEY,
   Password  VARCHAR(100),
-  RingLevel INT REFERENCES Role (RingLevel)
+  RingLevel INT REFERENCES Role (RingLevel),
+  CHECK (RingLevel >= 0 AND RingLevel < 4)
 );

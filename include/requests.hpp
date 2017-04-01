@@ -130,6 +130,10 @@ namespace jetdb{
 		  std::string clientGovID;
 		  std::vector<std::string> otherPassengerGovIDs;
 		  std::vector<std::string> flightIDList;
+		  bool operator==(bookFlight const& other) const{
+			  return std::tie(clientGovID, otherPassengerGovIDs, flightIDList) ==
+					  std::tie(other.clientGovID, other.otherPassengerGovIDs, other.flightIDList);
+		  }
 	  };
 	  void to_json(nlohmann::json& j, const bookFlight& v) {
 		  j = nlohmann::json{
@@ -155,6 +159,70 @@ namespace jetdb{
 	  }
 	  void from_json(const nlohmann::json& j, flewEveryAirline& v) {
 		  v = flewEveryAirline{};
+	  }
+
+	  struct addFlight{
+		  int pID;
+		  std::string prefix;
+		  std::string fromAirportCode;
+		  std::string toAirportCode;
+		  std::string startTime;
+		  std::string endTime;
+		  int cost;
+
+		  bool operator==(addFlight const& other) const{
+			  return std::tie(pID, prefix, fromAirportCode, toAirportCode, startTime, endTime, cost) ==
+					 std::tie(other.pID, other.prefix, other.fromAirportCode, other.toAirportCode, other.startTime, other.endTime, other.cost);
+		  }
+	  };
+	  void to_json(nlohmann::json& j, const addFlight& v) {
+		  j = nlohmann::json{
+				  {"operation", "addFlight"},
+				  {"pID", v.pID},
+				  {"prefix", v.prefix},
+				  {"fromAirportCode", v.fromAirportCode},
+				  {"toAirportCode", v.toAirportCode},
+				  {"startTime", v.startTime},
+				  {"endTime", v.endTime},
+				  {"cost", v.cost}
+		  };
+	  }
+	  void from_json(const nlohmann::json& j, addFlight& v) {
+		  v = addFlight{
+				  j["pID"].get<int>(),
+				  j["prefix"].get<std::string>(),
+				  j["fromAirportCode"].get<std::string>(),
+				  j["toAirportCode"].get<std::string>(),
+				  j["startTime"].get<std::string>(),
+				  j["endTime"].get<std::string>(),
+				  j["cost"].get<int>()
+		  };
+	  }
+
+	  struct addUser{
+		  std::string email;
+		  std::string password;
+		  int ringLevel;
+
+		  bool operator==(addUser const& other) const{
+			  return std::tie(email, password, ringLevel) ==
+					 std::tie(other.email, other.password, other.ringLevel);
+		  }
+	  };
+	  void to_json(nlohmann::json& j, const addUser& v) {
+		  j = nlohmann::json{
+				  {"operation", "addUser"},
+				  {"email", v.email},
+				  {"password", v.password},
+				  {"ringLevel", v.ringLevel}
+		  };
+	  }
+	  void from_json(const nlohmann::json& j, addUser& v) {
+		  v = addUser{
+				  j["email"].get<std::string>(),
+				  j["password"].get<std::string>(),
+				  j["ringLevel"].get<int>()
+		  };
 	  }
 
 
@@ -200,6 +268,70 @@ namespace jetdb{
       v = find_paths{
         j["from_airportcode"].get<std::string>(),
         j["to_airportcode"].get<std::string>()
+      };
+    }
+
+    struct cost_summary {
+      std::string from_airportcode;
+      std::string to_airportcode;
+      bool operator==(cost_summary const& other) const {
+        return std::tie(from_airportcode, to_airportcode) == std::tie(other.from_airportcode, other.to_airportcode);
+      }
+    };
+
+    void to_json(nlohmann::json& j, const cost_summary& v) {
+      j = nlohmann::json{
+        {"operation", "cost_summary"},
+        {"from_airportcode", v.from_airportcode},
+        {"to_airportcode", v.to_airportcode}
+      };
+    }
+
+    void from_json(const nlohmann::json& j, cost_summary& v) {
+      v = cost_summary{
+        j.find("from_airportcode") != j.end() ? j["from_airportcode"].get<std::string>() : "",
+        j.find("to_airportcode") != j.end() ? j["to_airportcode"].get<std::string>() : ""
+      };
+    }
+
+    struct customers {
+      std::string govid;
+      bool operator==(customers const& other) const {
+        return std::tie(govid) == std::tie(other.govid);
+      }
+    };
+
+    void to_json(nlohmann::json& j, const customers& v) {
+      j = nlohmann::json{
+        {"operation", "customers"},
+        {"govid", v.govid}
+      };
+    }
+
+    void from_json(const nlohmann::json& j, customers& v) {
+      v = customers{
+        j.find("govid") != j.end() ? j["govid"].get<std::string>() : ""
+      };
+    }
+
+
+    struct get_bookings {
+      std::string govid;
+      bool operator==(get_bookings const& other) const {
+        return std::tie(govid) == std::tie(other.govid);
+      }
+    };
+
+    void to_json(nlohmann::json& j, const get_bookings& v) {
+      j = nlohmann::json{
+        {"operation", "get_bookings"},
+        {"govid", v.govid}
+      };
+    }
+
+    void from_json(const nlohmann::json& j, get_bookings& v) {
+      v = get_bookings{
+        j.find("govid") != j.end() ? j["govid"].get<std::string>() : ""
       };
     }
 

@@ -10,12 +10,17 @@
 #include <handlers/login2.hpp>
 #include <handlers/bookFlight.hpp>
 #include <handlers/flewEveryAirline.hpp>
+#include <handlers/addFlight.hpp>
+#include <handlers/addUser.hpp>
 
 #include <handlers/available_flights.hpp>
 #include <handlers/get_airports.hpp>
 #include <handlers/get_airlines.hpp>
 #include <handlers/avg_costs.hpp>
 #include <handlers/find_paths.hpp>
+#include <handlers/cost_summary.hpp>
+#include <handlers/customers.hpp>
+#include <handlers/get_bookings.hpp>
 
 namespace jetdb{
   namespace handlers{
@@ -30,13 +35,17 @@ namespace jetdb{
       {"login", request_handler<requests::login>()},
       {"login2", request_handler<requests::login2>()},
       {"bookFlight", request_handler<requests::bookFlight>()},
+      {"addFlight", request_handler<requests::addFlight>()},
       {"flewEveryAirline", request_handler<requests::flewEveryAirline>()},
+      {"addUser", request_handler<requests::addUser>()},
       {"available_flights", request_handler<requests::available_flights>()},
       {"get_airports", request_handler<requests::get_airports>()},
       {"get_airlines", request_handler<requests::get_airlines>()},
       {"avg_costs", request_handler<requests::avg_costs>()},
       {"find_paths", request_handler<requests::find_paths>()},
-      {"bookFlight", request_handler<requests::bookFlight>()},
+      {"cost_summary", request_handler<requests::cost_summary>()},
+      {"customers", request_handler<requests::customers>()},
+      {"get_bookings", request_handler<requests::get_bookings>()},
     };
 
     nlohmann::json handle_request(pqxx::work& txn, nlohmann::json req){

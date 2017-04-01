@@ -74,4 +74,32 @@ SELECT
 FROM flight
   NATURAL JOIN named
   NATURAL JOIN flightname
-  NATURAL JOIN airline
+  NATURAL JOIN airline;
+
+--witness
+SELECT DISTINCT flight.prefix
+FROM books
+  JOIN booked ON booked.bid = books.bid
+  JOIN flight ON flight.fid = booked.fid;
+
+--badness
+(SELECT a.prefix
+  FROM airline a)
+ EXCEPT
+ (SELECT flight.prefix
+FROM books
+  JOIN booked ON booked.bid = books.bid
+  JOIN flight ON flight.fid = booked.fid);
+
+-- people who flew with every airline
+SELECT c.govid
+FROM client c
+WHERE NOT exists
+((SELECT a.prefix
+  FROM airline a)
+ EXCEPT
+ (SELECT flight.prefix
+  FROM books
+    JOIN booked ON booked.bid = books.bid
+    JOIN flight ON flight.fid = booked.fid
+  WHERE books.govid = c.govid));
