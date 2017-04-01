@@ -293,6 +293,48 @@ namespace jetdb{
         j.find("to_airportcode") != j.end() ? j["to_airportcode"].get<std::string>() : ""
       };
     }
+
+    struct customers {
+      std::string govid;
+      bool operator==(customers const& other) const {
+        return std::tie(govid) == std::tie(other.govid);
+      }
+    };
+
+    void to_json(nlohmann::json& j, const customers& v) {
+      j = nlohmann::json{
+        {"operation", "customers"},
+        {"govid", v.govid}
+      };
+    }
+
+    void from_json(const nlohmann::json& j, customers& v) {
+      v = customers{
+        j.find("govid") != j.end() ? j["govid"].get<std::string>() : ""
+      };
+    }
+
+
+    struct get_bookings {
+      std::string govid;
+      bool operator==(get_bookings const& other) const {
+        return std::tie(govid) == std::tie(other.govid);
+      }
+    };
+
+    void to_json(nlohmann::json& j, const get_bookings& v) {
+      j = nlohmann::json{
+        {"operation", "get_bookings"},
+        {"govid", v.govid}
+      };
+    }
+
+    void from_json(const nlohmann::json& j, get_bookings& v) {
+      v = get_bookings{
+        j.find("govid") != j.end() ? j["govid"].get<std::string>() : ""
+      };
+    }
+
   }
 
   namespace responses{
