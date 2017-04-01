@@ -98,6 +98,7 @@ struct _connection{
     socket.receive(msg);
     std::string result;
     msg >> result;
+    std::cout << "Result: " << result << std::endl;
     return nlohmann::json::parse(result);
   }
 } connection;
@@ -270,6 +271,14 @@ struct book_flights_state_t{
 struct find_customer_state_t{
   state_t back_state;
   std::vector<std::pair<std::string, std::string>> customers;
+  find_customer_state_t(state_t back_state): back_state{back_state}{
+    auto res = connection.make_request(jetdb::requests::customers{});
+    std::vector<std::pair<std::string, std::string>> data;
+    for(nlohmann::json row: res.data[0][0]["rows"]){
+      data.emplace_back(row["cname"].get<std::string>(), row["govid"].get<std::string>());
+    }
+    customers = data;
+  }
   void call(){
     ImGui::Begin("Find customer");
     for(auto c: customers){
@@ -287,6 +296,47 @@ struct find_customer_state_t{
   }
 };
 
+struct list_bookings_state_t{
+  state_t back_state;
+  nlohmann::json data;
+  list_bookings_state_t(state_t back_state): back_state{back_state}{
+    auto res = connection.make_request(jetdb::requests::get_bookings{});
+    data = res.data;
+  }
+  void call(){
+    ImGui::Begin("Bookings");
+    nlohmann::json::array_t columns = data[0][0]["columns"];
+    nlohmann::json::array_t rows = data[0][0]["rows"];
+    ImGui::Columns(columns.size()+1);
+    for(std::string col: columns){
+      ImGui::Text("%s", col.c_str());
+      ImGui::NextColumn();
+    }
+    ImGui::NextColumn();
+    ImGui::Separator();
+    for(nlohmann::json::object_t row: rows){
+      for(std::size_t i = 0; i < columns.size(); ++i){
+        ImGui::Text("%s", row[columns[i].get<std::string>()].get<std::string>().c_str());
+        ImGui::NextColumn();
+      }
+      if(ImGui::Button("Delete")){
+        auto res = connection.make_request(jetdb::requests::deleteBooking{std::stoi(row["bid"].get<std::string>())});
+        if(!res.success){
+          state = failed_state_t{*this, res.reason};
+        }else{
+          state = list_bookings_state_t{back_state};
+        }
+      }
+      ImGui::NextColumn();
+    }
+    ImGui::Columns(1);
+    if(ImGui::Button("Back")){
+      state = back_state;
+    }
+    ImGui::End();
+  }
+};
+
 struct query_select_state_t{
   void call(){
     ImGui::Begin("Select Query");
@@ -296,14 +346,12 @@ struct query_select_state_t{
     if(ImGui::Button("List Airports")){
       state = query_airports_state_t{*this};
     }
+    if(ImGui::Button("List Bookings")){
+      state = list_bookings_state_t{*this};
+    }
     ImGui::Separator();
     if(ImGui::Button("Select Customer")){
-      auto res = connection.make_request(jetdb::requests::customers{});
-      std::vector<std::pair<std::string, std::string>> data;
-      for(nlohmann::json row: res.data[0][0]["rows"]){
-        data.emplace_back(row["cname"].get<std::string>(), row["govid"].get<std::string>());
-      }
-      state = find_customer_state_t{*this, data};
+      state = find_customer_state_t{*this};
     }
     if(clientGovID != ""){
       ImGui::Separator();
