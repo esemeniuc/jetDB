@@ -225,17 +225,19 @@ TEST_CASE("add user bad case")
 	pqxx::work tx{connection};
 	std::string email = "a@a.com";
 	std::string password = "secret";
-	int roleLevel = 4; //this should break it
+	int roleLevel = 7; //this should break because of the check constraint being valid from 0 to 3
 
 	pqxx::result result = tx.exec("SELECT COUNT(*) FROM LoginUser;");
 	int usersCountInitial = result[0][0].as<int>();
+
+	result = tx.exec("INSERT INTO Role (RingLevel, RingDesc) VALUES ('7','SUPA HACKA');"); //avoid fkey check
 
 	jetdb::responses::result badRequest1 =
 			jetdb::handlers::handle_request(tx, jetdb::requests::addUser{ email, password, roleLevel });
 
 	pqxx::work tx2{connection}; //TODO: unhack this later
 	result = tx2.exec("SELECT COUNT(*) FROM LoginUser;");
-	int usersCountUpdated = result[0][0].as<int>();
+	int usersCountUpdated 	= result[0][0].as<int>();
 //	std::cout << usersCountInitial << " " << usersCountUpdated << '\n';
 	REQUIRE(usersCountInitial == usersCountUpdated);
 
