@@ -47,10 +47,6 @@ std::vector<std::string> read_sql_list(std::string lst){
   return acc;
 }
 
-nlohmann::json get_response_data(nlohmann::json const& js){
-  return js[0][0];
-}
-
 struct state_t{
   std::unique_ptr<base_state_t> ptr;
   template<typename State>
@@ -205,6 +201,7 @@ struct query_airports_state_t{
 struct book_flights_state_t{
   state_t back_state;
   nlohmann::json current_options = nullptr;
+  std::vector<std::vector<std::string>> fnames;
   char src_airportcode[256] = {0}, dst_airportcode[256] = {0};
   void call(){
     ImGui::Begin("Book flights");
@@ -212,51 +209,57 @@ struct book_flights_state_t{
     ImGui::InputText("To airport", dst_airportcode, 256);
     if(ImGui::Button("Find Flights")){
       auto res = connection.make_request(jetdb::requests::find_paths{src_airportcode, dst_airportcode});
-      auto tmp = book_flights_state_t{back_state, res.data};
+      std::vector<std::vector<std::string>> names;
+      for(nlohmann::json row: res.data["rows"]){
+        auto fids = read_sql_list(row["fids"]);
+        std::vector<std::string> n;
+        for(std::string fid: fids){
+          auto result = connection.make_request(jetdb::requests::available_flights{"", "", std::stoi(fid)});
+          if(result.data["rows"][0] != nullptr){
+            n.push_back(result.data["rows"][0]["fid"]);
+          }else{
+            n.push_back("");
+          }
+        }
+        names.push_back(n);
+      }
+      auto tmp = book_flights_state_t{back_state, res.data, names};
       std::copy_n(src_airportcode, 256, tmp.src_airportcode);
       std::copy_n(dst_airportcode, 256, tmp.dst_airportcode);
       state = tmp;
     }
 
     // booking options
-    if(current_options != nullptr && current_options.size() > 0 && current_options.is_array()){
-      nlohmann::json _data = current_options[0];
-      if(_data != nullptr && _data.is_array() && _data.size() > 0){
-        nlohmann::json data = _data[0];
-        nlohmann::json::array_t columns = data["columns"];
-        nlohmann::json::array_t rows = data["rows"];
-        ImGui::Columns(3);
-        ImGui::Text("Airports");
+    if(current_options != nullptr){
+      nlohmann::json data = current_options;
+      nlohmann::json::array_t columns = data["columns"];
+      nlohmann::json::array_t rows = data["rows"];
+      ImGui::Columns(3);
+      ImGui::Text("Airports");
+      ImGui::NextColumn();
+      ImGui::Text("Flights");
+      ImGui::NextColumn();
+      ImGui::NextColumn();
+      ImGui::Separator();
+      int i = 0;
+      for(nlohmann::json::object_t row: rows){
+        ImGui::Text("%s", row["complete_path"].get<std::string>().c_str());
         ImGui::NextColumn();
-        ImGui::Text("Flights");
-        ImGui::NextColumn();
-        ImGui::NextColumn();
-        ImGui::Separator();
-        for(nlohmann::json::object_t row: rows){
-          ImGui::Text("%s", row["complete_path"].get<std::string>().c_str());
-          ImGui::NextColumn();
-          auto fids = read_sql_list(row["fids"]);
-          for(std::string fid: fids){
-            auto result = connection.make_request(jetdb::requests::available_flights{"", "", std::stoi(fid)});
-            nlohmann::json a = result.data[0];
-            nlohmann::json b = a[0];
-            nlohmann::json c = b["rows"];
-            nlohmann::json d = c[0];
-            nlohmann::json e = d["fid"];
-            std::string fname = e;
-            ImGui::Text("%s, ", fname.c_str());
-          }
-          ImGui::NextColumn();
-          if(ImGui::Button("Book")){
-            auto result = connection.make_request(jetdb::requests::bookFlight{clientGovID, std::vector<std::string>{}, fids});
-            if(result.success){
-
-            }else{
-              state = failed_state_t{*this, result.reason};
-            }
-          }
-          ImGui::NextColumn();
+        auto fids = read_sql_list(row["fids"]);
+        for(std::string fname: fnames[i]){
+          ImGui::Text("%s", fname.c_str());
         }
+        ImGui::NextColumn();
+        if(ImGui::Button((std::string("Book")+std::to_string(i)).c_str())){
+          auto result = connection.make_request(jetdb::requests::bookFlight{clientGovID, std::vector<std::string>{}, fids});
+          if(result.success){
+            state = failed_state_t{*this, "success"};
+          }else{
+            state = failed_state_t{*this, result.reason};
+          }
+        }
+        ImGui::NextColumn();
+        ++i;
       }
       ImGui::Columns(1);
     }
