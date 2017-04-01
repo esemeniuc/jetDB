@@ -12,10 +12,13 @@ namespace jetdb{
       int fid = req.fid;
       txn.conn().prepare(
         "available_flights",
-        "SELECT * FROM Flight WHERE "
-        "  ($1 = '' OR prefix = $1)"
-        "  AND ($2 = '' OR fromairportcode = $2 OR toairportcode = $2)"
-        "  AND ($3 = -1 OR fid = $3)"
+        "SELECT f.*, CONCAT(prefix, flightnum) as flightname "
+        "FROM flight f "
+        "NATURAL JOIN named "
+        "WHERE "
+        "  ($1 = '' OR prefix = $1) "
+        "  AND ($2 = '' OR fromairportcode = $2 OR toairportcode = $2) "
+        "  AND ($3 = -1 OR f.fid = $3)"
       );
       result = txn.prepared("available_flights")(prefix)(airportcode)(fid).exec();
 
