@@ -19,6 +19,8 @@
 #include <handlers/avg_costs.hpp>
 #include <handlers/find_paths.hpp>
 #include <handlers/cost_summary.hpp>
+#include <handlers/customers.hpp>
+#include <handlers/get_bookings.hpp>
 
 namespace jetdb{
   namespace handlers{
@@ -42,6 +44,8 @@ namespace jetdb{
       {"avg_costs", request_handler<requests::avg_costs>()},
       {"find_paths", request_handler<requests::find_paths>()},
       {"cost_summary", request_handler<requests::cost_summary>()},
+      {"customers", request_handler<requests::customers>()},
+      {"get_bookings", request_handler<requests::get_bookings>()},
     };
 
     nlohmann::json handle_request(pqxx::work& txn, nlohmann::json req){
