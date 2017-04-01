@@ -197,3 +197,47 @@ TEST_CASE("add flight bad case")
 
 	REQUIRE(badRequest1 == jetdb::handlers::addFlight::failureMsg);
 }
+
+TEST_CASE("add user good case")
+{
+	pqxx::work tx{connection};
+	std::string email = "a@a.com";
+	std::string password = "secret";
+	int roleLevel = 1;
+
+	pqxx::result result = tx.exec("SELECT COUNT(*) FROM LoginUser;");
+	int usersCountInitial = result[0][0].as<int>();
+
+	jetdb::responses::result goodRequest1 =
+			jetdb::handlers::handle_request(tx, jetdb::requests::addUser{ email, password, roleLevel });
+
+	result = tx.exec("SELECT COUNT(*) FROM LoginUser;");
+	int usersCountUpdated = result[0][0].as<int>();
+//	std::cout << usersCountInitial << " " << usersCountUpdated << '\n';
+	REQUIRE(usersCountInitial+1 == usersCountUpdated);
+
+	REQUIRE(goodRequest1 == jetdb::handlers::addUser::successMsg);
+}
+
+
+TEST_CASE("add user bad case")
+{
+	pqxx::work tx{connection};
+	std::string email = "a@a.com";
+	std::string password = "secret";
+	int roleLevel = 4; //this should break it
+
+	pqxx::result result = tx.exec("SELECT COUNT(*) FROM LoginUser;");
+	int usersCountInitial = result[0][0].as<int>();
+
+	jetdb::responses::result badRequest1 =
+			jetdb::handlers::handle_request(tx, jetdb::requests::addUser{ email, password, roleLevel });
+
+	pqxx::work tx2{connection}; //TODO: unhack this later
+	result = tx2.exec("SELECT COUNT(*) FROM LoginUser;");
+	int usersCountUpdated = result[0][0].as<int>();
+//	std::cout << usersCountInitial << " " << usersCountUpdated << '\n';
+	REQUIRE(usersCountInitial == usersCountUpdated);
+
+	REQUIRE(badRequest1 == jetdb::handlers::addUser::failureMsg);
+}

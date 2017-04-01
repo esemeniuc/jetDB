@@ -161,7 +161,6 @@ namespace jetdb{
 		  v = flewEveryAirline{};
 	  }
 
-	  //add flight
 	  struct addFlight{
 		  int pID;
 		  std::string prefix;
@@ -197,6 +196,32 @@ namespace jetdb{
 				  j["startTime"].get<std::string>(),
 				  j["endTime"].get<std::string>(),
 				  j["cost"].get<int>()
+		  };
+	  }
+
+	  struct addUser{
+		  std::string email;
+		  std::string password;
+		  int ringLevel;
+
+		  bool operator==(addUser const& other) const{
+			  return std::tie(email, password, ringLevel) ==
+					 std::tie(other.email, other.password, other.ringLevel);
+		  }
+	  };
+	  void to_json(nlohmann::json& j, const addUser& v) {
+		  j = nlohmann::json{
+				  {"operation", "addUser"},
+				  {"email", v.email},
+				  {"password", v.password},
+				  {"ringLevel", v.ringLevel}
+		  };
+	  }
+	  void from_json(const nlohmann::json& j, addUser& v) {
+		  v = addUser{
+				  j["email"].get<std::string>(),
+				  j["password"].get<std::string>(),
+				  j["ringLevel"].get<int>()
 		  };
 	  }
 
