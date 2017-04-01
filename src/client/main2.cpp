@@ -81,7 +81,7 @@ struct state_t{
 };
 
 state_t state;
-std::string clientGovID;
+std::string clientGovID, clientName;
 struct _connection{
   zmqpp::context context;
   zmqpp::socket socket;
@@ -267,27 +267,25 @@ struct book_flights_state_t{
   }
 };
 
-/*struct query_airports_state_t{
+struct find_customer_state_t{
   state_t back_state;
-  char airportcode[256] = {0}, apname[256] = {0};
+  std::vector<std::pair<std::string, std::string>> customers;
   void call(){
-    ImGui::Begin("Query Airports");
-    ImGui::InputText("Airport code", airportcode, 256);
-    ImGui::InputText("Airport name", apname, 256);
-    if(ImGui::Button("Execute")){
-      auto res = connection.make_request(jetdb::requests::get_airports{airportcode, apname});
-      if(res.success){
-        state = table_display_t{*this, res.data};
-      }else{
-        state = failed_state_t{*this, res.reason};
+    ImGui::Begin("Find customer");
+    for(auto c: customers){
+      if(ImGui::Button(c.first.c_str())){
+        clientGovID = c.second;
+        clientName = c.first;
+        state = back_state;
       }
     }
-    if(ImGui::Button("Back")){
+    if(ImGui::Button("No-one")){
+      clientGovID = "";
       state = back_state;
     }
     ImGui::End();
   }
-};*/
+};
 
 struct query_select_state_t{
   void call(){
@@ -298,8 +296,21 @@ struct query_select_state_t{
     if(ImGui::Button("List Airports")){
       state = query_airports_state_t{*this};
     }
-    if(ImGui::Button("Book Flight")){
-      state = book_flights_state_t{*this};
+    ImGui::Separator();
+    if(ImGui::Button("Select Customer")){
+      auto res = connection.make_request(jetdb::requests::customers{});
+      std::vector<std::pair<std::string, std::string>> data;
+      for(nlohmann::json row: res.data[0][0]["rows"]){
+        data.emplace_back(row["cname"].get<std::string>(), row["govid"].get<std::string>());
+      }
+      state = find_customer_state_t{*this, data};
+    }
+    if(clientGovID != ""){
+      ImGui::Separator();
+      ImGui::Text("Customer: %s, %s", clientName.c_str(), clientGovID.c_str());
+      if(ImGui::Button("Book Flight")){
+        state = book_flights_state_t{*this};
+      }
     }
     ImGui::Separator();
     if(ImGui::Button("Exit")){
