@@ -13,6 +13,7 @@
 #include <handlers/bookFlight.hpp>
 #include <handlers/deleteBooking.hpp>
 #include <handlers/flewEveryAirline.hpp>
+#include <handlers/updateRingLevel.hpp>
 
 #include <handlers/available_flights.hpp>
 #include <handlers/get_airports.hpp>
@@ -40,6 +41,7 @@ namespace jetdb{
       {"bookFlight", request_handler<requests::bookFlight>()},
       {"deleteBooking", request_handler<requests::deleteBooking>()},
       {"flewEveryAirline", request_handler<requests::flewEveryAirline>()},
+      {"updateRingLevel", request_handler<requests::updateRingLevel>()},
       {"available_flights", request_handler<requests::available_flights>()},
       {"get_airports", request_handler<requests::get_airports>()},
       {"get_airlines", request_handler<requests::get_airlines>()},

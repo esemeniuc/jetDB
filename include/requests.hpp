@@ -245,8 +245,31 @@ namespace jetdb{
 		  };
 	  }
 
+	  struct updateRingLevel{
+		  std::string email;
+		  int ringLevel;
 
-    // average costs
+		  bool operator==(updateRingLevel const& other) const{
+			  return std::tie(email, ringLevel) ==
+					 std::tie(other.email, other.ringLevel);
+		  }
+	  };
+	  void to_json(nlohmann::json& j, const updateRingLevel& v) {
+		  j = nlohmann::json{
+				  {"operation", "updateRingLevel"},
+				  {"email", v.email},
+				  {"ringLevel", v.ringLevel}
+		  };
+	  }
+	  void from_json(const nlohmann::json& j, updateRingLevel& v) {
+		  v = updateRingLevel{
+				  j["email"].get<std::string>(),
+				  j["ringLevel"].get<int>()
+		  };
+	  }
+
+
+	  // average costs
     struct avg_costs {
       std::string kind;
       bool operator==(avg_costs const& other) const {

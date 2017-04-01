@@ -215,7 +215,6 @@ TEST_CASE("add user good case")
 	int usersCountUpdated = result[0][0].as<int>();
 //	std::cout << usersCountInitial << " " << usersCountUpdated << '\n';
 	REQUIRE(usersCountInitial+1 == usersCountUpdated);
-
 	REQUIRE(goodRequest1 == jetdb::handlers::addUser::successMsg);
 }
 
@@ -240,7 +239,6 @@ TEST_CASE("add user bad case")
 	int usersCountUpdated = result[0][0].as<int>();
 //	std::cout << usersCountInitial << " " << usersCountUpdated << '\n';
 	REQUIRE(usersCountInitial == usersCountUpdated);
-
 	REQUIRE(badRequest1 == jetdb::handlers::addUser::failureMsg);
 }
 
@@ -278,4 +276,41 @@ TEST_CASE("delete booking bad case")
 //	std::cout << bookingsCountInitial << " " << bookingsCountUpdated << '\n';
 	REQUIRE(bookingsCountInitial == bookingsCountUpdated);
 	REQUIRE(badRequest1 == jetdb::handlers::deleteBooking::failureMsg);
+}
+
+TEST_CASE("update ring level good case")
+{
+	pqxx::work tx{connection};
+	std::string email = "test@test.com";
+	int ringLevel = 1;
+
+	jetdb::responses::result goodRequest1 =
+			jetdb::handlers::handle_request(tx, jetdb::requests::updateRingLevel{ email, ringLevel });
+
+//	std::cout << usersCountInitial << " " << usersCountUpdated << '\n';
+	REQUIRE(goodRequest1 == jetdb::handlers::updateRingLevel::successMsg);
+}
+
+
+TEST_CASE("update ring level bad case")
+{
+	pqxx::work tx{connection};
+	std::string email = "test@test.com";
+	int ringLevel = 7; //this should break because of the check constraint being valid from 0 to 3
+	pqxx::result result = result = tx.exec("INSERT INTO Role (RingLevel, RingDesc) VALUES ('7','SUPA HACKA');"); //avoid fkey check
+
+	tx.conn().prepare("checkRingLevel", "SELECT RingLevel FROM LoginUser WHERE Email = $1;"); //check our current level
+	result = tx.prepared("checkRingLevel")(email).exec();
+	int initialRingLevel = result[0][0].as<int>();
+
+	jetdb::responses::result badRequest1 =
+			jetdb::handlers::handle_request(tx, jetdb::requests::updateRingLevel{ email, ringLevel });
+
+	pqxx::work tx2{connection}; //TODO: unhack this later
+	tx2.conn().prepare("checkRingLevel", "SELECT RingLevel FROM LoginUser WHERE Email = $1;");
+	result = tx2.prepared("checkRingLevel")(email).exec();
+	int currentRingLevel = result[0][0].as<int>();
+//	std::cout << usersCountInitial << " " << usersCountUpdated << '\n';
+	REQUIRE(initialRingLevel == currentRingLevel);
+	REQUIRE(badRequest1 == jetdb::handlers::updateRingLevel::failureMsg);
 }
