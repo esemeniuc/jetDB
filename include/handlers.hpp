@@ -11,6 +11,7 @@
 #include <handlers/bookFlight.hpp>
 #include <handlers/flewEveryAirline.hpp>
 #include <handlers/addFlight.hpp>
+#include <handlers/addUser.hpp>
 
 #include <handlers/available_flights.hpp>
 #include <handlers/get_airports.hpp>
@@ -34,12 +35,12 @@ namespace jetdb{
       {"bookFlight", request_handler<requests::bookFlight>()},
       {"addFlight", request_handler<requests::addFlight>()},
       {"flewEveryAirline", request_handler<requests::flewEveryAirline>()},
+      {"addUser", request_handler<requests::addUser>()},
       {"available_flights", request_handler<requests::available_flights>()},
       {"get_airports", request_handler<requests::get_airports>()},
       {"get_airlines", request_handler<requests::get_airlines>()},
       {"avg_costs", request_handler<requests::avg_costs>()},
       {"find_paths", request_handler<requests::find_paths>()},
-      {"bookFlight", request_handler<requests::bookFlight>()},
       {"cost_summary", request_handler<requests::cost_summary>()},
     };
 
