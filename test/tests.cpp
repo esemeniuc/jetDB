@@ -237,9 +237,45 @@ TEST_CASE("add user bad case")
 
 	pqxx::work tx2{connection}; //TODO: unhack this later
 	result = tx2.exec("SELECT COUNT(*) FROM LoginUser;");
-	int usersCountUpdated 	= result[0][0].as<int>();
+	int usersCountUpdated = result[0][0].as<int>();
 //	std::cout << usersCountInitial << " " << usersCountUpdated << '\n';
 	REQUIRE(usersCountInitial == usersCountUpdated);
 
 	REQUIRE(badRequest1 == jetdb::handlers::addUser::failureMsg);
+}
+
+TEST_CASE("delete booking good case")
+{
+	pqxx::work tx{connection};
+	int bid = 1;
+
+	pqxx::result result = tx.exec("SELECT COUNT(*) FROM Booking;");
+	int bookingsCountInitial = result[0][0].as<int>();
+
+	jetdb::responses::result goodRequest1 =
+			jetdb::handlers::handle_request(tx, jetdb::requests::deleteBooking{ bid });
+
+	result = tx.exec("SELECT COUNT(*) FROM Booking;");
+	int bookingsCountUpdated = result[0][0].as<int>();
+//	std::cout << bookingsCountInitial << " " << bookingsCountUpdated << '\n';
+	REQUIRE(bookingsCountInitial == bookingsCountUpdated+1);
+	REQUIRE(goodRequest1 == jetdb::handlers::deleteBooking::successMsg);
+}
+
+TEST_CASE("delete booking bad case")
+{
+	pqxx::work tx{connection};
+	int bid = 999999999;
+
+	pqxx::result result = tx.exec("SELECT COUNT(*) FROM Booking;");
+	int bookingsCountInitial = result[0][0].as<int>();
+
+	jetdb::responses::result badRequest1 =
+			jetdb::handlers::handle_request(tx, jetdb::requests::deleteBooking{ bid });
+
+	result = tx.exec("SELECT COUNT(*) FROM Booking;");
+	int bookingsCountUpdated = result[0][0].as<int>();
+//	std::cout << bookingsCountInitial << " " << bookingsCountUpdated << '\n';
+	REQUIRE(bookingsCountInitial == bookingsCountUpdated);
+	REQUIRE(badRequest1 == jetdb::handlers::deleteBooking::failureMsg);
 }

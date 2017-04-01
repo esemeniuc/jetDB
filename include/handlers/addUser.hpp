@@ -2,7 +2,6 @@
 
 #include <pqxx/pqxx>
 #include <requests.hpp>
-//#include "../../src/ring2.h"
 
 namespace jetdb
 {
