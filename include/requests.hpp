@@ -225,6 +225,26 @@ namespace jetdb{
 		  };
 	  }
 
+	  struct deleteBooking{
+		  int bid;
+
+		  bool operator==(deleteBooking const& other) const{
+			  return std::tie(bid) ==
+					 std::tie(bid);
+		  }
+	  };
+	  void to_json(nlohmann::json& j, const deleteBooking& v) {
+		  j = nlohmann::json{
+				  {"operation", "deleteBooking"},
+				  {"bid", v.bid}
+		  };
+	  }
+	  void from_json(const nlohmann::json& j, deleteBooking& v) {
+		  v = deleteBooking{
+				  j["bid"].get<int>()
+		  };
+	  }
+
 
     // average costs
     struct avg_costs {
