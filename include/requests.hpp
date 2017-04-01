@@ -203,6 +203,28 @@ namespace jetdb{
       };
     }
 
+    struct cost_summary {
+      std::string from_airportcode;
+      std::string to_airportcode;
+      bool operator==(cost_summary const& other) const {
+        return std::tie(from_airportcode, to_airportcode) == std::tie(other.from_airportcode, other.to_airportcode);
+      }
+    };
+
+    void to_json(nlohmann::json& j, const cost_summary& v) {
+      j = nlohmann::json{
+        {"operation", "cost_summary"},
+        {"from_airportcode", v.from_airportcode},
+        {"to_airportcode", v.to_airportcode}
+      };
+    }
+
+    void from_json(const nlohmann::json& j, cost_summary& v) {
+      v = cost_summary{
+        j.find("from_airportcode") != j.end() ? j["from_airportcode"].get<std::string>() : "",
+        j.find("to_airportcode") != j.end() ? j["to_airportcode"].get<std::string>() : ""
+      };
+    }
   }
 
   namespace responses{
