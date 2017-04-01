@@ -98,6 +98,7 @@ struct _connection{
     socket.receive(msg);
     std::string result;
     msg >> result;
+    std::cout << result << std::endl;
     return nlohmann::json::parse(result);
   }
 } connection;
@@ -133,8 +134,8 @@ struct table_display_t{
   nlohmann::json data;
   void call(){
     ImGui::Begin("Data");
-    nlohmann::json::array_t columns = data[0][0]["columns"];
-    nlohmann::json::array_t rows = data[0][0]["rows"];
+    nlohmann::json::array_t columns = data["columns"];
+    nlohmann::json::array_t rows = data["rows"];
     ImGui::Columns(columns.size());
     for(std::string col: columns){
       ImGui::Text("%s", col.c_str());
@@ -300,7 +301,7 @@ struct query_select_state_t{
     if(ImGui::Button("Select Customer")){
       auto res = connection.make_request(jetdb::requests::customers{});
       std::vector<std::pair<std::string, std::string>> data;
-      for(nlohmann::json row: res.data[0][0]["rows"]){
+      for(nlohmann::json row: res.data["rows"]){
         data.emplace_back(row["cname"].get<std::string>(), row["govid"].get<std::string>());
       }
       state = find_customer_state_t{*this, data};
