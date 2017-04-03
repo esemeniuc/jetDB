@@ -6,6 +6,7 @@
 using json = nlohmann::json;
 
 std::string print_table(json data) {
+  if(data == nullptr) return "no data";
   std::stringstream ss;
   ss << "Number of results: " << data["rows"].size() << std::endl;
   ss << std::endl;
