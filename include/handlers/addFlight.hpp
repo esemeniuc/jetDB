@@ -25,6 +25,7 @@ namespace jetdb
 			{
 				txn.prepared("flightInsert")(req.pID)(req.prefix)(req.fromAirportCode)(req.toAirportCode)
 						(req.startTime)(req.endTime)(req.cost).exec();
+				txn.commit();
 				return jetdb::handlers::addFlight::successMsg;
 			} catch(const std::exception &e)
 			{

@@ -23,6 +23,7 @@ namespace jetdb
 			try
 			{
 				txn.prepared("userInsert")(req.email)(req.password)(req.ringLevel).exec();
+				txn.commit();
 				return jetdb::handlers::addUser::successMsg;
 			} catch(const std::exception &e)
 			{

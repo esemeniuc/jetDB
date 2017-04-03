@@ -20,6 +20,7 @@ namespace jetdb
 			pqxx::result result = txn.prepared("deleteBooking")(req.bid).exec();
 			if(result.affected_rows() > 0)
 			{
+				txn.commit();
 				return jetdb::handlers::deleteBooking::successMsg;
 			}
 			return jetdb::handlers::deleteBooking::failureMsg;

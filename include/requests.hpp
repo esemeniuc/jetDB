@@ -387,15 +387,15 @@ namespace jetdb{
       nlohmann::json data;
 
       result() = default;
-      result(bool s, std::string reason="", nlohmann::json data={}):
+      result(bool s, std::string reason="", nlohmann::json data=nullptr):
         success{s},
         reason{std::move(reason)},
-        data{std::move(data)}
+        data(std::move(data))
       {}
       result(std::exception const& e):
         success{false},
         reason{e.what()},
-        data{}
+        data(nullptr)
       {}
       bool operator==(result const& other) const{
         return std::tie(success, reason, data) == std::tie(other.success, other.reason, other.data);
