@@ -31,7 +31,7 @@ TEST_CASE("generic"){
 		  {
 			  "success": true,
 			  "reason": "",
-			  "data":[null]
+			  "data":null
 		  }
 		)"_json;
 
@@ -68,79 +68,89 @@ TEST_CASE("user authentication"){
 
 TEST_CASE("book flight")
 {
-	pqxx::work tx{connection};
 	//use data from sampleDataJetDB.sql
-	jetdb::responses::result goodRequest1 = jetdb::handlers::handle_request(tx, jetdb::requests::bookFlight{
-			//clientGovID
-			"12345678",
-			{//otherPassengerGovIDs
-					"22223333",
-					"33334444"
-			},
-			{//flightIDList
-					"1",
-					"3",
-					"4",
-			}});
+  {
+    pqxx::work tx{connection};
+    jetdb::responses::result goodRequest1 = jetdb::handlers::handle_request(tx, jetdb::requests::bookFlight{
+  			//clientGovID
+  			"12345678",
+  			{//otherPassengerGovIDs
+  					"22223333",
+  					"33334444"
+  			},
+  			{//flightIDList
+  					"1",
+  					"3",
+  					"4",
+  			}});
+    REQUIRE(goodRequest1 == jetdb::handlers::bookFlight::successMsg);
+  }
 
-	jetdb::responses::result badRequest1 = jetdb::handlers::handle_request(tx, jetdb::requests::bookFlight{
-			//clientGovID
-			"not a govID",
-			{//otherPassengerGovIDs
-					"22223333",
-					"33334444"
-			},
-			{//flightIDList
-					"1",
-					"3",
-					"4",
-			}});
+  {
+    pqxx::work tx{connection};
+    jetdb::responses::result badRequest1 = jetdb::handlers::handle_request(tx, jetdb::requests::bookFlight{
+  			//clientGovID
+  			"not a govID",
+  			{//otherPassengerGovIDs
+  					"22223333",
+  					"33334444"
+  			},
+  			{//flightIDList
+  					"1",
+  					"3",
+  					"4",
+  			}});
+    REQUIRE(badRequest1 == jetdb::handlers::bookFlight::failureMsg);
+  }
 
 //	std::cout << goodRequest1.success << goodRequest1.reason << goodRequest1.data << '\n';
 //	std::cout << badRequest1.success << badRequest1.reason << badRequest1.data << '\n';
-
-	REQUIRE(goodRequest1 == jetdb::handlers::bookFlight::successMsg);
-	REQUIRE(badRequest1 == jetdb::handlers::bookFlight::failureMsg);
 }
 
 TEST_CASE("find passengers who flew with every airline (frequent fliers)")
 {
-	pqxx::work tx{connection};
 	//use data from sampleDataJetDB.sql
 
 	//try before adding data
-	jetdb::responses::result response = jetdb::handlers::handle_request(tx, jetdb::requests::flewEveryAirline{});
-	jetdb::responses::result expectedResult{true, "", nlohmann::json::parse(
-			"{\"columns\":[\"govid\"],\"rows\":[]}")}; //TODO fix output format
-	REQUIRE(response == expectedResult);
+  {
+    pqxx::work tx{connection};
+  	jetdb::responses::result response = jetdb::handlers::handle_request(tx, jetdb::requests::flewEveryAirline{});
+  	jetdb::responses::result expectedResult{true, "", nlohmann::json::parse(
+  			"{\"columns\":[\"govid\"],\"rows\":[]}")}; //TODO fix output format
+  	REQUIRE(response == expectedResult);
+  }
 
-	jetdb::responses::result insertRequest = jetdb::handlers::handle_request(tx, jetdb::requests::bookFlight{
-			//clientGovID
-			"22223333",
-			{//otherPassengerGovIDs
-					"33334444"
-			},
-			{//flightIDList
-					"1",
-					"2",
-					"3",
-					"4",
-					"5",
-					"6",
-					"7"
-			}});
+  {
+    pqxx::work tx{connection};
+  	jetdb::responses::result insertRequest = jetdb::handlers::handle_request(tx, jetdb::requests::bookFlight{
+  			//clientGovID
+  			"22223333",
+  			{//otherPassengerGovIDs
+  					"33334444"
+  			},
+  			{//flightIDList
+  					"1",
+  					"2",
+  					"3",
+  					"4",
+  					"5",
+  					"6",
+  					"7"
+  			}});
+  }
 
-	//try after adding data
-	response = jetdb::handlers::handle_request(tx, jetdb::requests::flewEveryAirline{});
-	expectedResult = {true, "", nlohmann::json::parse("{\"columns\":[\"govid\"],\"rows\":[{\"govid\":\"22223333\"}, "
-															  "{\"govid\":\"33334444\"}]}")}; //TODO fix output format
-
-	REQUIRE(response == expectedResult);
+  {
+    pqxx::work tx{connection};
+  	//try after adding data
+  	jetdb::responses::result response = jetdb::handlers::handle_request(tx, jetdb::requests::flewEveryAirline{});
+  	jetdb::responses::result expectedResult = {true, "", nlohmann::json::parse("{\"columns\":[\"govid\"],\"rows\":[{\"govid\":\"22223333\"}, "
+  															  "{\"govid\":\"33334444\"}]}")}; //TODO fix output format
+    REQUIRE(response == expectedResult);
+  }
 }
 
 TEST_CASE("add flight good case")
 {
-	pqxx::work tx{connection};
 	int pID = 1;
 	std::string prefix = "UAE";
 	std::string fromAirportCode = "NRT";
@@ -148,23 +158,33 @@ TEST_CASE("add flight good case")
 	std::string startTime = "2017-01-12 19:13:49.000000";
 	std::string endTime = "2017-01-12 23:13:49.000000";
 	int cost = 500;
+  int flightsCountInitial;
+	{
+    pqxx::work tx{connection};
+    pqxx::result result = tx.exec("SELECT COUNT(*) FROM Flight;");
+	  flightsCountInitial = result[0][0].as<int>();
+  }
 
-	pqxx::result result = tx.exec("SELECT COUNT(*) FROM Flight;");
-	int flightsCountInitial = result[0][0].as<int>();
+  jetdb::responses::result goodRequest1;
+  {
+    pqxx::work tx{connection};
+  	goodRequest1 =
+  			jetdb::handlers::handle_request(
+  					tx, jetdb::requests::addFlight{
+  							pID, prefix, fromAirportCode, toAirportCode, startTime, endTime, cost
+  					}
+  			);
+  }
 
-	jetdb::responses::result goodRequest1 =
-			jetdb::handlers::handle_request(
-					tx, jetdb::requests::addFlight{
-							pID, prefix, fromAirportCode, toAirportCode, startTime, endTime, cost
-					}
-			);
-
-	result = tx.exec("SELECT COUNT(*) FROM Flight;");
-	int flightsCountUpdated = result[0][0].as<int>();
+  int flightsCountUpdated;
+	{
+    pqxx::work tx{connection};
+    pqxx::result result = tx.exec("SELECT COUNT(*) FROM Flight;");
+	  flightsCountUpdated = result[0][0].as<int>();
+  }
 //	std::cout << flightsCountInitial << " " << flightsCountUpdated << '\n';
+  REQUIRE(goodRequest1 == jetdb::handlers::addFlight::successMsg);
 	REQUIRE(flightsCountInitial+1 == flightsCountUpdated);
-
-	REQUIRE(goodRequest1 == jetdb::handlers::addFlight::successMsg);
 }
 
 TEST_CASE("add flight bad case")
@@ -189,7 +209,7 @@ TEST_CASE("add flight bad case")
 					}
 			);
 
-	pqxx::work tx2{connection}; //TODO: unhack this later
+	pqxx::work tx2{connection};
 	result = tx2.exec("SELECT COUNT(*) FROM Flight;");
 	int flightsCountUpdated = result[0][0].as<int>();
 //	std::cout << flightsCountInitial << " " << flightsCountUpdated << '\n';
@@ -200,82 +220,115 @@ TEST_CASE("add flight bad case")
 
 TEST_CASE("add user good case")
 {
-	pqxx::work tx{connection};
 	std::string email = "a@a.com";
 	std::string password = "secret";
 	int roleLevel = 1;
 
-	pqxx::result result = tx.exec("SELECT COUNT(*) FROM LoginUser;");
-	int usersCountInitial = result[0][0].as<int>();
+  int usersCountInitial;
+  {
+    pqxx::work tx{connection};
+  	pqxx::result result = tx.exec("SELECT COUNT(*) FROM LoginUser;");
+  	usersCountInitial = result[0][0].as<int>();
+  }
 
-	jetdb::responses::result goodRequest1 =
-			jetdb::handlers::handle_request(tx, jetdb::requests::addUser{ email, password, roleLevel });
+  {
+    pqxx::work tx{connection};
+  	jetdb::responses::result goodRequest1 =
+  			jetdb::handlers::handle_request(tx, jetdb::requests::addUser{ email, password, roleLevel });
+    REQUIRE(goodRequest1 == jetdb::handlers::addUser::successMsg);
+  }
 
-	result = tx.exec("SELECT COUNT(*) FROM LoginUser;");
-	int usersCountUpdated = result[0][0].as<int>();
-//	std::cout << usersCountInitial << " " << usersCountUpdated << '\n';
-	REQUIRE(usersCountInitial+1 == usersCountUpdated);
-
-	REQUIRE(goodRequest1 == jetdb::handlers::addUser::successMsg);
+  {
+    pqxx::work tx{connection};
+    pqxx::result result = tx.exec("SELECT COUNT(*) FROM LoginUser;");
+  	int usersCountUpdated = result[0][0].as<int>();
+  	REQUIRE(usersCountInitial+1 == usersCountUpdated);
+  }
 }
 
 
 TEST_CASE("add user bad case")
 {
-	pqxx::work tx{connection};
 	std::string email = "a@a.com";
 	std::string password = "secret";
 	int roleLevel = 7; //this should break because of the check constraint being valid from 0 to 3
 
-	pqxx::result result = tx.exec("SELECT COUNT(*) FROM LoginUser;");
-	int usersCountInitial = result[0][0].as<int>();
+  int usersCountInitial;
+  {
+    pqxx::work tx{connection};
+    pqxx::result result = tx.exec("SELECT COUNT(*) FROM LoginUser;");
+  	usersCountInitial = result[0][0].as<int>();
+  }
 
-	result = tx.exec("INSERT INTO Role (RingLevel, RingDesc) VALUES ('7','SUPA HACKA');"); //avoid fkey check
+	{
+    pqxx::work tx{connection};
+    pqxx::result result = tx.exec("INSERT INTO Role (RingLevel, RingDesc) VALUES ('7','SUPA HACKA');"); //avoid fkey check
+  }
 
-	jetdb::responses::result badRequest1 =
+	{
+    pqxx::work tx{connection};
+    jetdb::responses::result badRequest1 =
 			jetdb::handlers::handle_request(tx, jetdb::requests::addUser{ email, password, roleLevel });
+    REQUIRE(badRequest1 == jetdb::handlers::addUser::failureMsg);
+  }
 
-	pqxx::work tx2{connection}; //TODO: unhack this later
-	result = tx2.exec("SELECT COUNT(*) FROM LoginUser;");
-	int usersCountUpdated = result[0][0].as<int>();
-//	std::cout << usersCountInitial << " " << usersCountUpdated << '\n';
-	REQUIRE(usersCountInitial == usersCountUpdated);
-
-	REQUIRE(badRequest1 == jetdb::handlers::addUser::failureMsg);
+  {
+    pqxx::work tx{connection};
+  	pqxx::result result = tx.exec("SELECT COUNT(*) FROM LoginUser;");
+  	int usersCountUpdated = result[0][0].as<int>();
+  	REQUIRE(usersCountInitial == usersCountUpdated);
+  }
 }
 
 TEST_CASE("delete booking good case")
 {
-	pqxx::work tx{connection};
 	int bid = 1;
 
-	pqxx::result result = tx.exec("SELECT COUNT(*) FROM Booking;");
-	int bookingsCountInitial = result[0][0].as<int>();
+  int bookingsCountInitial;
+  {
+    pqxx::work tx{connection};
+  	pqxx::result result = tx.exec("SELECT COUNT(*) FROM Booking;");
+  	bookingsCountInitial = result[0][0].as<int>();
+  }
 
-	jetdb::responses::result goodRequest1 =
-			jetdb::handlers::handle_request(tx, jetdb::requests::deleteBooking{ bid });
+  {
+    pqxx::work tx{connection};
+    jetdb::responses::result goodRequest1 =
+  			jetdb::handlers::handle_request(tx, jetdb::requests::deleteBooking{ bid });
+    REQUIRE(goodRequest1 == jetdb::handlers::deleteBooking::successMsg);
+  }
 
-	result = tx.exec("SELECT COUNT(*) FROM Booking;");
-	int bookingsCountUpdated = result[0][0].as<int>();
-//	std::cout << bookingsCountInitial << " " << bookingsCountUpdated << '\n';
-	REQUIRE(bookingsCountInitial == bookingsCountUpdated+1);
-	REQUIRE(goodRequest1 == jetdb::handlers::deleteBooking::successMsg);
+  {
+    pqxx::work tx{connection};
+    pqxx::result result = tx.exec("SELECT COUNT(*) FROM Booking;");
+  	int bookingsCountUpdated = result[0][0].as<int>();
+  	REQUIRE(bookingsCountInitial == bookingsCountUpdated+1);
+  }
 }
 
 TEST_CASE("delete booking bad case")
 {
-	pqxx::work tx{connection};
 	int bid = 999999999;
 
-	pqxx::result result = tx.exec("SELECT COUNT(*) FROM Booking;");
-	int bookingsCountInitial = result[0][0].as<int>();
+  int bookingsCountInitial;
+  {
+    pqxx::work tx{connection};
+  	pqxx::result result = tx.exec("SELECT COUNT(*) FROM Booking;");
+  	bookingsCountInitial = result[0][0].as<int>();
+  }
 
-	jetdb::responses::result badRequest1 =
-			jetdb::handlers::handle_request(tx, jetdb::requests::deleteBooking{ bid });
+  {
+    pqxx::work tx{connection};
+    jetdb::responses::result badRequest1 =
+  			jetdb::handlers::handle_request(tx, jetdb::requests::deleteBooking{ bid });
+    REQUIRE(badRequest1 == jetdb::handlers::deleteBooking::failureMsg);
+  }
 
-	result = tx.exec("SELECT COUNT(*) FROM Booking;");
-	int bookingsCountUpdated = result[0][0].as<int>();
-//	std::cout << bookingsCountInitial << " " << bookingsCountUpdated << '\n';
-	REQUIRE(bookingsCountInitial == bookingsCountUpdated);
-	REQUIRE(badRequest1 == jetdb::handlers::deleteBooking::failureMsg);
+  {
+    pqxx::work tx{connection};
+  	pqxx::result result = tx.exec("SELECT COUNT(*) FROM Booking;");
+  	int bookingsCountUpdated = result[0][0].as<int>();
+  	REQUIRE(bookingsCountInitial == bookingsCountUpdated);
+  }
+
 }
